@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+  <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'"> -->
+
+  <title>Trojan GUI</title>
+</head>
+
+<body>
+  <!-- <button id="trojan">连接</button>
+  <button id="exit">exit</button> -->
+  <div id="app"></div>
+  <div id="error"></div>
+  <!-- You can also require other files to run in this process -->
+  <script>
+    const electron= require('electron')
+    const fs = require('fs')
+    const path = require('path')
+    const { remote } = electron
+    const { Menu, MenuItem } = remote
+  </script>
+  <script src="./lib/bundle.js"></script>
+</body>
+
+</html>
