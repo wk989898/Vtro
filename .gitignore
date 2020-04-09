@@ -1,3 +1,5 @@
 node_modules
 dist
-trojan
+trojan/trojan.txt
+trojan/lists.json
+trojan/log.txt
