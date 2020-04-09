@@ -1,8 +1,0 @@
-node_modules
-dist
-trojan/trojan.txt
-trojan/log.txt
-trojan/lists.json
-trojan/config.json
-
-.gitignore
