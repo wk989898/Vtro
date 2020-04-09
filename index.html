@@ -11,15 +11,14 @@
 </head>
 
 <body>
-  <!-- <button id="trojan">连接</button>
-  <button id="exit">exit</button> -->
+  <div id="error" style="display: none"></div>
   <div id="app"></div>
-  <div id="error"></div>
   <!-- You can also require other files to run in this process -->
   <script>
     const electron= require('electron')
     const fs = require('fs')
     const path = require('path')
+    const cp = require('child_process')
     const { remote } = electron
     const { Menu, MenuItem } = remote
   </script>
