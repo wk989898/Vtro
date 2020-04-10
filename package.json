@@ -4,19 +4,27 @@
   "description": "A simple trojan GUI",
   "main": "main.js",
   "build": {
-    "productName":"Vtro",
-    "asar":false,
+    "productName": "Vtro",
+    "asar": false,
+    "compression": "store",
     "win": {
       "target": [
         "zip"
       ]
     },
-    "extraFiles":["tray.ico",{
-      "from":"extra-trojan/",
-      "to":"trojan/"
-    }
-  ],
-    "files":["lib/","index.html","main.js"]
+    "extraFiles": [
+      "tray.ico",
+      {
+        "from": "extra-trojan/",
+        "to": "trojan/"
+      }
+    ],
+    "files": [
+      "lib/",
+      "index.html",
+      "main.js",
+      "tray.ico"
+    ]
   },
   "scripts": {
     "start": "electron . ",

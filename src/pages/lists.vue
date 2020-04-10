@@ -57,7 +57,6 @@ export default {
 .list {
   height: 30px;
   padding-left: 2em;
-  padding-right: 2em;
   overflow: hidden;
   border: 1px solid black;
   cursor: default;
@@ -81,8 +80,9 @@ export default {
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   width: 100%;
   margin: 10px;
+  margin-right:20px; 
 }
-.lists::first-letter {
+.lists:first-child {
   border-radius: 2px 2px 0 0;
 }
 </style>

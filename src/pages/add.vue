@@ -57,7 +57,7 @@
         ipc.send('add-list', {
           data
         })
-        this.$router.go('/')
+        this.$router.push('/')
       }
     }
   }

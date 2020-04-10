@@ -21,7 +21,7 @@ function createWindow() {
   win.loadFile('index.html')
   // Open the DevTools.
   //  开发者工具
-  win.webContents.openDevTools()
+  // win.webContents.openDevTools()
   win.on('close', (e) => {
     e.preventDefault()
     win.hide()
