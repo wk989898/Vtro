@@ -21,7 +21,7 @@ function createWindow() {
   win.loadFile('index.html')
   // Open the DevTools.
   //  开发者工具
-  // win.webContents.openDevTools()
+  win.webContents.openDevTools()
   win.on('close', (e) => {
     e.preventDefault()
     win.hide()
@@ -31,6 +31,7 @@ function createWindow() {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
+app.name="Vtro"
 app.on('ready', () => {
   createWindow()
   // tray 
@@ -65,14 +66,15 @@ app.on('activate', function () {
   if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
-// 监听事件
+/** 监听事件 */
+// 连接
 ipcMain.on('link', (e, r) => {
   trojan = cp.execFile('./trojan.exe', {
     cwd: path.resolve('./trojan')
   }, (err, res) => {
     if (err) {
       fs.readFile('./trojan/log.txt', 'utf-8', (error, r) => {
-        if (error) err += `\n can not find log.txt!\n ${error.stack}`;
+        if (error) err += `\n can not find log.txt!\n ${error.stack}\n`
         fs.appendFile('./trojan/log.txt', err, 'utf-8', () => { })
       })
     }
@@ -83,6 +85,7 @@ ipcMain.on('link', (e, r) => {
 ipcMain.on('close', (e, r) => {
   trojan && trojan.kill()
 })
+// 更改节点
 ipcMain.on('change-list', (e, r) => {
   fs.readFile('./trojan/config.json', 'utf-8', (err, res) => {
     if (err) fs.appendFile('./trojan/log.txt', err, 'utf-8', () => { })
@@ -97,18 +100,24 @@ ipcMain.on('change-list', (e, r) => {
     })
   })
 })
+// 获取订阅
 ipcMain.on('get-sub', e => {
   fs.readFile('./trojan/sub.txt', (err, r) => {
-    if (err) fs.appendFile('./trojan/log.txt', err, 'utf-8', () => { })
-    r&&e.reply('sub', r.toString())
+    if (err) {
+      fs.appendFile('./trojan/log.txt', err + '\n', 'utf-8', () => { })
+      return;
+    }
+    r && e.reply('sub', r.toString())
   })
 })
+// 更新节点
 ipcMain.on('update', (e, r) => {
   fs.writeFile('./trojan/sub.txt', r.sub, () => { })
   fs.writeFile('./trojan/lists.json', JSON.stringify(r.data), 'utf-8', err => {
     if (err) fs.appendFile('./trojan/log.txt', err, 'utf-8', () => { })
   })
 })
+// 获取节点
 ipcMain.once('get-lists', (e, r) => {
   fs.readFile('./trojan/lists.json', 'utf-8', (err, res) => {
     if (err) {
@@ -124,9 +133,10 @@ ipcMain.once('get-lists', (e, r) => {
     e.reply('update-lists', data)
   })
 })
+// 手动添加节点
 ipcMain.on('add-list', (e, r) => {
   fs.readFile('./trojan/lists.json', 'utf-8', (err, res) => {
-    if (err) fs.appendFile('./trojan/log.txt', err, 'utf-8', () => { })
+    if (err) fs.appendFile('./trojan/log.txt', err + '\n', 'utf-8', () => { })
     let data = JSON.parse(res.toString()) || []
     try {
       data.unshift(r.data)
@@ -135,7 +145,7 @@ ipcMain.on('add-list', (e, r) => {
       data.unshift(r.data)
     }
     fs.writeFile('./trojan/lists.json', JSON.stringify(data), 'utf-8', err => {
-      if (err) fs.appendFile('./trojan/log.txt', err, 'utf-8', () => { })
+      if (err) fs.appendFile('./trojan/log.txt', err + '\n', 'utf-8', () => { })
     })
   })
 })

@@ -2,15 +2,7 @@
   <div class="main">
     <el-collapse v-model="activeNames">
       <el-collapse-item title="连接" name="1">
-        <el-button type="primary" id="link" @click="link">连接</el-button>
-        <el-button type="primary" id="close" @click="close">关闭</el-button>
-        <el-switch
-          v-model="connect"
-          disabled
-          active-color="#13ce66"
-          inactive-color="#ff4949"
-          style="z-index:9"
-        ></el-switch>
+        <links />
       </el-collapse-item>
       <el-collapse-item :title="type" name="2">
         <keep-alive>
@@ -18,27 +10,33 @@
         </keep-alive>
       </el-collapse-item>
     </el-collapse>
-    <!-- <div v-if="!connect&&error">
-    </div>-->
+    <back />
   </div>
 </template>
 
 <script>
+import links from './pages/links'
+import back from './components/back'
+
 export default {
   name: 'App',
   data() {
     return {
       connect: false,
-      activeNames: ['1'],
+      activeNames: ['1','2'],
       type: '节点列表',
       now: null,
       error: null
     }
   },
+  components:{
+    links,back
+  },
   created() {
     this.$router.push(`/`)
   },
   mounted() {
+    window.ipc=electron.ipcRenderer
     let ipc = electron.ipcRenderer
     let o = {
       sub: '订阅',
@@ -54,44 +52,21 @@ export default {
         this.type = o[v]
       })
     })
-    this.closed(ipc)
   },
   methods: {
-    link() {
-      let ipc = electron.ipcRenderer
-      this.connect = true
-      ipc.send('link')
-    },
-    close() {
-      let ipc = electron.ipcRenderer
-      this.connect = false
-      ipc.send('close')
-    },
-    closed(ipc) {
-      ipc.on('closed', (e, arg) => {
-        console.log('closed!')
-        this.connect = false
-      })
-    }
   }
 }
 </script>
 <style>
-html {
-  overflow: -moz-hidden-unscrollable;
-  height: 100%;
-}
 body::-webkit-scrollbar {
   display: none;
 }
-body {
-  -ms-overflow-style: none;
-  height: 100%;
-  width: calc(100vw + 18px);
-  overflow: auto;
+body{
+  margin: 0;
+  padding: 0;
+  color: #606266;
 }
 .main{
-  margin-right:10px; 
   padding: 20px;
   padding-top: 3px;
 }

@@ -7,7 +7,7 @@
   <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'"> -->
   
-  <title>Vtro</title>
+  <title>Vtro - a trojan gui</title>
 </head>
 
 <body>
@@ -16,7 +16,8 @@
   <script>
     const electron= require('electron')
     const { remote } = electron
-    const { Menu, MenuItem } = remote
+    const { Menu, MenuItem ,ipcMain} = remote
+    
   </script>
   <script src="./lib/bundle.js"></script>
 </body>

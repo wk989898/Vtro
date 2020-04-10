@@ -17,7 +17,10 @@ export default {
   },
   activated() {
     let ipc = electron.ipcRenderer
-    ipc.send('get-sub')
+    this.sub===''&&ipc.send('get-sub')
+  },
+  mounted(){
+    let ipc = electron.ipcRenderer
     ipc.on('sub', (e, arg) => {
       this.sub = arg
     })
@@ -26,7 +29,6 @@ export default {
     update() {
       let ipc = electron.ipcRenderer
       this.$axios.get(this.sub).then(res => {
-        console.log(Trojan)
         let data = this.$global.lists = Trojan.subscribe(res.data)
         ipc.send('update', { data, sub: this.sub })
         this.confirm=false
