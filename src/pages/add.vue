@@ -52,12 +52,12 @@
           addr: form.addr,
           name: form.name
         }
-        this.$global.lists.unshift(data)
+        this.$global.lists&&this.$global.lists.unshift(data)
         let ipc = electron.ipcRenderer
         ipc.send('add-list', {
           data
         })
-        this.$router.go(-1)
+        this.$router.go('/')
       }
     }
   }

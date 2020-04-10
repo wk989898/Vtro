@@ -69,7 +69,7 @@ export default {
     },
     closed(ipc) {
       ipc.on('closed', (e, arg) => {
-        console.log('closed!',arg.err.message)
+        console.log('closed!')
         this.connect = false
       })
     }

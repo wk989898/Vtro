@@ -1,15 +1,22 @@
 {
   "name": "vtro",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "A simple trojan GUI",
   "main": "main.js",
   "build": {
+    "productName":"Vtro",
+    "asar":false,
     "win": {
       "target": [
-        "nsis",
         "zip"
       ]
+    },
+    "extraFiles":["tray.ico",{
+      "from":"extra-trojan/",
+      "to":"trojan/"
     }
+  ],
+    "files":["lib/","index.html","main.js"]
   },
   "scripts": {
     "start": "electron . ",
@@ -18,7 +25,7 @@
     "packager": "electron-packager .  Vtro  --out ./ --overwrite --ignore=node_modules",
     "dist": "electron-builder --win --x64"
   },
-  "repository": "https://github.com/electron/electron-quick-start",
+  "repository": "https://github.com/saywhere/Vtro",
   "keywords": [
     "Electron",
     "trojan",

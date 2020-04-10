@@ -57,6 +57,7 @@ export default {
 .list {
   height: 30px;
   padding-left: 2em;
+  padding-right: 2em;
   overflow: hidden;
   border: 1px solid black;
   cursor: default;

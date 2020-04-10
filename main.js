@@ -1,11 +1,11 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, ipcMain, Menu, Tray } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu, Tray, shell } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const cp = require('child_process')
 
 
-var win, tray,trojan
+var win, tray, trojan
 
 function createWindow() {
   // Create the browser window.
@@ -14,7 +14,6 @@ function createWindow() {
     height: 600,
     webPreferences: {
       nodeIntegration: true,
-      preload: path.join(__dirname, 'preload.js'),
       devTools: true
     },
   })
@@ -73,21 +72,20 @@ ipcMain.on('link', (e, r) => {
   }, (err, res) => {
     if (err) {
       fs.readFile('./trojan/log.txt', 'utf-8', (error, r) => {
-        let raw = r.toString() + err
-        if (error) raw+=`\n can not find log.txt!\n ${error.stack}`;
-        fs.writeFile('./trojan/log.txt', raw, 'utf-8', err => { })
+        if (error) err += `\n can not find log.txt!\n ${error.stack}`;
+        fs.appendFile('./trojan/log.txt', err, 'utf-8', () => { })
       })
     }
-    e.reply('closed',{err})
+    e.reply('closed', { err })
     console.log('link is closed')
   })
 })
-ipcMain.on('close',(e,r)=>{
-  trojan&&trojan.kill()
+ipcMain.on('close', (e, r) => {
+  trojan && trojan.kill()
 })
 ipcMain.on('change-list', (e, r) => {
   fs.readFile('./trojan/config.json', 'utf-8', (err, res) => {
-    if (err) throw err
+    if (err) fs.appendFile('./trojan/log.txt', err, 'utf-8', () => { })
     let data = JSON.parse(res.toString())
     // password,addr,port,
     data.remote_addr = r.addr
@@ -95,30 +93,49 @@ ipcMain.on('change-list', (e, r) => {
     data.password[0] = r.password
     console.log(data.remote_addr);
     fs.writeFile('./trojan/config.json', JSON.stringify(data), 'utf-8', err => {
-      if (err) throw err;
+      if (err) fs.appendFile('./trojan/log.txt', err, 'utf-8', () => { })
     })
   })
 })
+ipcMain.on('get-sub', e => {
+  fs.readFile('./trojan/sub.txt', (err, r) => {
+    if (err) fs.appendFile('./trojan/log.txt', err, 'utf-8', () => { })
+    r&&e.reply('sub', r.toString())
+  })
+})
 ipcMain.on('update', (e, r) => {
+  fs.writeFile('./trojan/sub.txt', r.sub, () => { })
   fs.writeFile('./trojan/lists.json', JSON.stringify(r.data), 'utf-8', err => {
-    if (err) throw err
+    if (err) fs.appendFile('./trojan/log.txt', err, 'utf-8', () => { })
   })
 })
 ipcMain.once('get-lists', (e, r) => {
   fs.readFile('./trojan/lists.json', 'utf-8', (err, res) => {
-    if (err) throw err
-    if (!res) return;
+    if (err) {
+      let d = []
+      fs.writeFile('./trojan/lists.json', JSON.stringify(d), () => { })
+    }
+    if (!res) {
+      let log = `please check your lists.json\n`
+      fs.appendFile('./trojan/log.txt', log, 'utf-8', () => { })
+      return;
+    };
     let data = JSON.parse(res.toString())
     e.reply('update-lists', data)
   })
 })
 ipcMain.on('add-list', (e, r) => {
   fs.readFile('./trojan/lists.json', 'utf-8', (err, res) => {
-    if (err) throw err
-    let data = JSON.parse(res.toString()) || ''
-    data.unshift(r.data)
+    if (err) fs.appendFile('./trojan/log.txt', err, 'utf-8', () => { })
+    let data = JSON.parse(res.toString()) || []
+    try {
+      data.unshift(r.data)
+    } catch{
+      data = []
+      data.unshift(r.data)
+    }
     fs.writeFile('./trojan/lists.json', JSON.stringify(data), 'utf-8', err => {
-      if (err) throw err
+      if (err) fs.appendFile('./trojan/log.txt', err, 'utf-8', () => { })
     })
   })
 })
@@ -141,6 +158,16 @@ const template = [
   {
     id: 'set',
     label: '设置'
+  },
+  {
+    id: 'log',
+    label: '日志',
+    click() {
+      try {
+        shell.openItem(path.resolve('trojan/log.txt'))
+      } catch (e) {
+      }
+    }
   }
 ]
 const menu = Menu.buildFromTemplate(template)
@@ -152,6 +179,7 @@ function send(channel, args) {
 
 menu.items.forEach(value => {
   let child = value.submenu
+  if (value.id === 'log') return;
   if (child) {
     child.items.forEach(val => {
       val.click = () => {
