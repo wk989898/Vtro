@@ -5,5 +5,7 @@
 
 ## 注意
 - 可以订阅和添加节点
-- 请自行添加config.json到trojan文件夹
 - 目前不支持ping,设置等
+
+## 下载
+[点击这里](https://github.com/saywhere/Vtro/releases/tag/v0.0.1)
