@@ -3,6 +3,7 @@ const path = require('path')
 const fs = require('fs')
 const cp = require('child_process')
 const http = require('http')
+var ping = require('ping')
 
 
 var win, tray, trojan, privo
@@ -20,7 +21,7 @@ function createWindow() {
   win.loadFile('index.html')
 
   //  开发者工具
-  // win.webContents.openDevTools()
+  win.webContents.openDevTools()
 
   win.on('close', (e) => {
     e.preventDefault()
@@ -70,13 +71,13 @@ function appendLog(err, path) {
   if (path === null || path === undefined) path = './trojan/log.txt'
   fs.appendFile(path, err + '\n', 'utf-8', () => { })
 }
-// 设置代理
-const server=http.createServer()
-server.on('request',(req,res)=>{
-  if(req.url==='/pac'){
+// 设置pac代理
+const server = http.createServer()
+server.on('request', (req, res) => {
+  if (req.url === '/pac') {
     res.setHeader('Content-Type', 'application/x-ns-proxy-autoconfig')
-    fs.readFile('./proxy/proxy.pac',(e,data)=>{
-      if(e) res.end('error')
+    fs.readFile('./proxy/proxy.pac', (e, data) => {
+      if (e) res.end('error')
       res.end(data)
     })
   }
@@ -130,7 +131,7 @@ ipcMain.on('close', (e, r) => {
   server.listening && server.close()
   privo && privo.kill()
 })
-// 更改节点
+// 更改连接节点
 ipcMain.on('change-list', (e, r) => {
   fs.readFile('./trojan/config.json', 'utf-8', (err, res) => {
     if (err) appendLog(err)
@@ -139,7 +140,6 @@ ipcMain.on('change-list', (e, r) => {
     data.remote_addr = r.addr
     data.remote_port = r.port
     data.password[0] = r.password
-    console.log(data.remote_addr);
     fs.writeFile('./trojan/config.json', JSON.stringify(data), 'utf-8', err => {
       if (err) appendLog(err)
     })
@@ -163,15 +163,15 @@ ipcMain.on('update', (e, r) => {
   })
 })
 // 获取节点
-ipcMain.once('get-lists', (e, r) => {
+ipcMain.on('get-lists', (e, r) => {
   fs.readFile('./trojan/lists.json', 'utf-8', (err, res) => {
     if (err) {
       let d = []
       fs.writeFile('./trojan/lists.json', JSON.stringify(d), () => { })
     }
     if (!res) {
-      let log = `please check your lists.json\n`
-      fs.appendFile('./trojan/log.txt', log, 'utf-8', () => { })
+      let log = `please check your lists.json`
+      appendLog(log)
       return;
     };
     let data = JSON.parse(res.toString())
@@ -194,6 +194,29 @@ ipcMain.on('add-list', (e, r) => {
     })
   })
 })
+// ping
+ipcMain.on('all-ping', async (e, hosts) => {
+  let arr = []
+  for (let list of hosts) {
+    let res = await ping.promise.probe(list.addr, {
+      timeout: 10,
+    })
+    if(res.avg==='unknown') res.avg=0
+    arr.push(parseInt(res.avg))
+  }
+  fs.readFile('./trojan/lists.json', 'utf-8', (err, res) => {
+    if (err) appendLog(err)
+    let data = JSON.parse(res.toString()) || []
+    for(let i in data){
+      data[i]['ping']=arr[i]
+    }
+    fs.writeFile('./trojan/lists.json', JSON.stringify(data), 'utf-8', err => {
+      if (err) appendLog(err)
+    })
+  })
+  e.reply('ping-result', arr)
+})
+
 
 // 菜单栏
 const template = [
@@ -208,7 +231,10 @@ const template = [
   },
   {
     id: 'ping',
-    label: 'ping'
+    label: 'ping',
+    click() {
+      send('ping')
+    }
   },
   {
     id: 'set',
@@ -220,7 +246,7 @@ const template = [
     submenu: [
       {
         id: 'trojanlog', label: 'trojan日志',
-        click() {
+        click: () => {
           try {
             shell.openItem(path.resolve('trojan/trojanlog.txt'))
           } catch (e) {
@@ -249,6 +275,7 @@ function send(channel, args) {
 menu.items.forEach(value => {
   let child = value.submenu
   if (value.id === 'log') return;
+  if (value.id === 'ping') return;
   if (child) {
     child.items.forEach(val => {
       val.click = () => {

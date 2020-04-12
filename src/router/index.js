@@ -11,7 +11,6 @@ Vue.use(Router)
 import sub from '../pages/sub'
 import lists from '../pages/lists'
 import add from '../pages/add'
-import ping from '../pages/ping'
 import set from '../pages/set'
 
 const routes=[
@@ -30,10 +29,6 @@ const routes=[
   {
     path:'/add',
     component:add  
-  },
-  {
-    path:'/ping',
-    component:ping  
   },
   {
     path:'/set',

@@ -1,13 +1,24 @@
 <template>
   <div class="lists">
-    <div v-for="(item,index) in lists" :key="item.ip"
-     @dblclick="select(index)" @click="i=index" 
-     :class="[{active:idx===index},{hover:i===index},'list']">
-      <i class="el-icon-check" v-show="idx===index"></i>
-      <span :title="item.name?`ip：${item.addr}\nport:${item.port}`:item">
-        {{item.name||item}}</span>
-    </div>
-    <el-backtop target=".main"></el-backtop>
+    <!-- <div v-for="(item,index) in lists" :key="item.ip"
+             @dblclick="select(index)" @click="i=index" 
+             :class="[{active:idx===index},{hover:i===index},'list']">
+              <i class="el-icon-check" v-show="idx===index"></i>
+              <span :title="item.name?`ip：${item.addr}\nport:${item.port}`:item">
+                {{item.name||item}}</span>
+            </div> -->
+    <el-table :data="lists" border style="width: 100%" highlight-current-row @current-change="select">
+      <el-table-column prop="ip" label="ip" width="180">
+      </el-table-column>
+      <el-table-column prop="name" label="名称" width="180">
+      </el-table-column>
+      <el-table-column prop="addr" label="地址">
+      </el-table-column>
+      <el-table-column prop="port" label="端口">
+      </el-table-column>
+      <el-table-column prop="ping" label="ping(ms)">
+      </el-table-column>
+    </el-table>
   </div>
 </template>
 
@@ -15,16 +26,21 @@
   export default {
     data() {
       return {
-        i: -1,
-        idx: -1,
         lists: null
       }
     },
     mounted() {
       let ipc = electron.ipcRenderer
-      ipc.once('update-lists', (e, arg) => {
+      ipc.on('update-lists', (e, arg) => {
         this.lists = this.$global.lists = arg
-        // console.log(this.lists)
+      })
+      ipc.on('ping', e => {
+        ipc.send('all-ping', this.lists)
+      })
+      ipc.on('ping-result', (e, arg) => {
+        // this.pings = arg
+        console.log(arg)
+        ipc.send('get-lists')
       })
     },
     activated() {
@@ -36,50 +52,19 @@
       this.$forceUpdate()
     },
     methods: {
-      select(index) {
-        this.idx = index
+      select(e) {
         let ipc = electron.ipcRenderer
-        let {
-          password,
-          addr,
-          port,
-          name
-        } = this.lists[index]
-        ipc.send('change-list', {
-          password,
-          addr,
-          port
-        })
-        this.$global.now = name
+        ipc.send('change-list', e)
         ipc.send('close')
+        this.$emit('makenow', e.name)
       }
     }
   }
 </script>
 <style scoped>
-  .list {
-    height: 30px;
-    padding-left: 2em;
-    padding-right: 2em;
-    border: 1px solid black;
-    cursor: default;
-    overflow: hidden;
-  }
-  .list span {
-    line-height: 30px;
-  }
-  .hover {
-    background-color: #e7e7e7;
-  }
-  .active {
-    background-color: rgb(115, 185, 255);
-  }
   .lists {
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
     margin: 10px;
     margin-right: 20px;
-  }
-  .lists:first-child {
-    border-radius: 2px 2px 0 0;
   }
 </style>

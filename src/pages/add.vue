@@ -1,16 +1,5 @@
 <template>
   <div>
-    <!-- <label for="addr">地址</label>
-      <input name="addr" v-model="addr"><br/>
-      <label for="port">端口</label>
-      <input name="port" v-model="port"><br/>
-      <label for="password">密码</label>
-      <input name="password" v-model="password"><br/>
-      <label for="note">备注</label>
-      <textarea name="note" v-model="name" /><br/>
-      <div>
-        <button @click="add">添加</button>
-      </div> -->
     <el-form ref="form" :model="form" label-width="80px">
       <el-form-item label="地址">
         <el-input v-model="form.addr"></el-input>
@@ -45,14 +34,16 @@
     },
     methods: {
       add() {
-        let form=this.form
+        let form = this.form
         let data = {
           addr: form.addr,
           port: form.port,
-          addr: form.addr,
-          name: form.name
+          name: form.name,
+          password: form.password,
+          ping: 0,
+          allow: 1
         }
-        this.$global.lists&&this.$global.lists.unshift(data)
+        this.$global.lists && this.$global.lists.unshift(data)
         let ipc = electron.ipcRenderer
         ipc.send('add-list', {
           data
