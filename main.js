@@ -1,10 +1,8 @@
-// Modules to control application life and create native browser window
 const { app, BrowserWindow, ipcMain, Menu, Tray, shell } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const cp = require('child_process')
 const http = require('http')
-const server = require('./proxy/pac.js')
 
 
 var win, tray, trojan, privo
@@ -19,11 +17,10 @@ function createWindow() {
       devTools: true
     },
   })
-  // and load the index.html of the app.
   win.loadFile('index.html')
-  // Open the DevTools.
+
   //  开发者工具
-  win.webContents.openDevTools()
+  // win.webContents.openDevTools()
 
   win.on('close', (e) => {
     e.preventDefault()
@@ -31,9 +28,6 @@ function createWindow() {
   })
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.name = "Vtro"
 app.on('ready', () => {
   createWindow()
@@ -67,8 +61,6 @@ app.on('window-all-closed', function (event) {
 
 
 app.on('activate', function () {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
@@ -79,6 +71,16 @@ function appendLog(err, path) {
   fs.appendFile(path, err + '\n', 'utf-8', () => { })
 }
 // 设置代理
+const server=http.createServer()
+server.on('request',(req,res)=>{
+  if(req.url==='/pac'){
+    res.setHeader('Content-Type', 'application/x-ns-proxy-autoconfig')
+    fs.readFile('./proxy/proxy.pac',(e,data)=>{
+      if(e) res.end('error')
+      res.end(data)
+    })
+  }
+})
 function makeproxy(type, arg) {
   cp.execFile('./sysproxy.exe', [type, arg], {
     cwd: './proxy',
