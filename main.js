@@ -3,9 +3,11 @@ const { app, BrowserWindow, ipcMain, Menu, Tray, shell } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const cp = require('child_process')
+const http = require('http')
+const server = require('./proxy/pac.js')
 
 
-var win, tray, trojan
+var win, tray, trojan, privo
 
 function createWindow() {
   // Create the browser window.
@@ -22,6 +24,7 @@ function createWindow() {
   // Open the DevTools.
   //  开发者工具
   win.webContents.openDevTools()
+
   win.on('close', (e) => {
     e.preventDefault()
     win.hide()
@@ -31,7 +34,7 @@ function createWindow() {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.name="Vtro"
+app.name = "Vtro"
 app.on('ready', () => {
   createWindow()
   // tray 
@@ -52,6 +55,9 @@ app.on('ready', () => {
 
 })
 
+app.on('before-quit', () => {
+  server.close()
+})
 // Quit when all windows are closed.
 app.on('window-all-closed', function (event) {
   // On macOS it is common for applications and their menu bar
@@ -67,28 +73,65 @@ app.on('activate', function () {
 })
 
 /** 监听事件 */
+// 添加日志
+function appendLog(err, path) {
+  if (path === null || path === undefined) path = './trojan/log.txt'
+  fs.appendFile(path, err + '\n', 'utf-8', () => { })
+}
+// 设置代理
+function makeproxy(type, arg) {
+  cp.execFile('./sysproxy.exe', [type, arg], {
+    cwd: './proxy',
+    windowsHide: true
+  }, (err, stdout, stderr) => {
+    if (err) appendLog(err) && server.close()
+    if (stderr) appendLog(stderr)
+  })
+}
+// http -> socks
+function privoxy() {
+  privo = cp.execFile('./privoxy.exe', {
+    cwd: './proxy',
+    windowsHide: true
+  }, (err, stdout, stderr) => {
+    if (err) appendLog(err) && server.close()
+    if (stderr) appendLog(stderr)
+  })
+}
 // 连接
-ipcMain.on('link', (e, r) => {
-  trojan = cp.execFile('./trojan.exe', {
-    cwd: path.resolve('./trojan')
-  }, (err, res) => {
-    if (err) {
-      fs.readFile('./trojan/log.txt', 'utf-8', (error, r) => {
-        if (error) err += `\n can not find log.txt!\n ${error.stack}\n`
-        fs.appendFile('./trojan/log.txt', err, 'utf-8', () => { })
-      })
-    }
-    e.reply('closed', { err })
+ipcMain.on('link', (e, type) => {
+  let arg = ''
+  if (type === 'proxy') {
+    arg = ''
+  } else if (type === 'pac') {
+    arg = `http://127.0.0.1:1082/pac`
+    !server.listening && server.listen(1082, '127.0.0.1', () => {
+      makeproxy(type, arg)
+      privo && privo.kill()
+      privoxy()
+    })
+  } else arg = ''
+
+  trojan = cp.execFile('trojan.exe', {
+    cwd: './trojan',
+    windowsHide: true
+  }, (err, stdout, stderr) => {
+    if (err) appendLog(stderr, './trojan/trojanlog.txt')
+    if (stderr) appendLog(stderr, './trojan/trojanlog.txt')
+    e.reply('closed', { err: err ? err : stderr ? stderr : null })
     console.log('link is closed')
   })
 })
+// 关闭
 ipcMain.on('close', (e, r) => {
   trojan && trojan.kill()
+  server.listening && server.close()
+  privo && privo.kill()
 })
 // 更改节点
 ipcMain.on('change-list', (e, r) => {
   fs.readFile('./trojan/config.json', 'utf-8', (err, res) => {
-    if (err) fs.appendFile('./trojan/log.txt', err, 'utf-8', () => { })
+    if (err) appendLog(err)
     let data = JSON.parse(res.toString())
     // password,addr,port,
     data.remote_addr = r.addr
@@ -96,7 +139,7 @@ ipcMain.on('change-list', (e, r) => {
     data.password[0] = r.password
     console.log(data.remote_addr);
     fs.writeFile('./trojan/config.json', JSON.stringify(data), 'utf-8', err => {
-      if (err) fs.appendFile('./trojan/log.txt', err, 'utf-8', () => { })
+      if (err) appendLog(err)
     })
   })
 })
@@ -104,7 +147,7 @@ ipcMain.on('change-list', (e, r) => {
 ipcMain.on('get-sub', e => {
   fs.readFile('./trojan/sub.txt', (err, r) => {
     if (err) {
-      fs.appendFile('./trojan/log.txt', err + '\n', 'utf-8', () => { })
+      appendLog(err)
       return;
     }
     r && e.reply('sub', r.toString())
@@ -114,7 +157,7 @@ ipcMain.on('get-sub', e => {
 ipcMain.on('update', (e, r) => {
   fs.writeFile('./trojan/sub.txt', r.sub, () => { })
   fs.writeFile('./trojan/lists.json', JSON.stringify(r.data), 'utf-8', err => {
-    if (err) fs.appendFile('./trojan/log.txt', err, 'utf-8', () => { })
+    if (err) appendLog(err)
   })
 })
 // 获取节点
@@ -136,7 +179,7 @@ ipcMain.once('get-lists', (e, r) => {
 // 手动添加节点
 ipcMain.on('add-list', (e, r) => {
   fs.readFile('./trojan/lists.json', 'utf-8', (err, res) => {
-    if (err) fs.appendFile('./trojan/log.txt', err + '\n', 'utf-8', () => { })
+    if (err) appendLog(err)
     let data = JSON.parse(res.toString()) || []
     try {
       data.unshift(r.data)
@@ -145,7 +188,7 @@ ipcMain.on('add-list', (e, r) => {
       data.unshift(r.data)
     }
     fs.writeFile('./trojan/lists.json', JSON.stringify(data), 'utf-8', err => {
-      if (err) fs.appendFile('./trojan/log.txt', err + '\n', 'utf-8', () => { })
+      if (err) appendLog(err)
     })
   })
 })
@@ -172,12 +215,26 @@ const template = [
   {
     id: 'log',
     label: '日志',
-    click() {
-      try {
-        shell.openItem(path.resolve('trojan/log.txt'))
-      } catch (e) {
-      }
-    }
+    submenu: [
+      {
+        id: 'trojanlog', label: 'trojan日志',
+        click() {
+          try {
+            shell.openItem(path.resolve('trojan/trojanlog.txt'))
+          } catch (e) {
+          }
+        }
+      },
+      {
+        id: 'linklog', label: '连接日志', click() {
+          try {
+            shell.openItem(path.resolve('trojan/log.txt'))
+          } catch (e) {
+          }
+        }
+      },
+    ]
+
   }
 ]
 const menu = Menu.buildFromTemplate(template)

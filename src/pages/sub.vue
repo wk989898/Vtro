@@ -17,7 +17,9 @@ export default {
   },
   activated() {
     let ipc = electron.ipcRenderer
-    this.sub===''&&ipc.send('get-sub')
+    if(!this.sub){
+      ipc.send('get-sub')
+    }
   },
   mounted(){
     let ipc = electron.ipcRenderer

@@ -38,19 +38,20 @@
     methods: {
       select(index) {
         this.idx = index
-        let ipcRenderer = electron.ipcRenderer
+        let ipc = electron.ipcRenderer
         let {
           password,
           addr,
           port,
           name
         } = this.lists[index]
-        ipcRenderer.send('change-list', {
+        ipc.send('change-list', {
           password,
           addr,
           port
         })
         this.$global.now = name
+        ipc.send('close')
       }
     }
   }

@@ -2,7 +2,7 @@
   <div class="main">
     <el-collapse v-model="activeNames">
       <el-collapse-item title="连接" name="1">
-        <links />
+        <links/>
       </el-collapse-item>
       <el-collapse-item :title="type" name="2">
         <keep-alive>
@@ -10,7 +10,7 @@
         </keep-alive>
       </el-collapse-item>
     </el-collapse>
-    <back />
+    <back/>
   </div>
 </template>
 
@@ -23,20 +23,20 @@ export default {
   data() {
     return {
       connect: false,
-      activeNames: ['1','2'],
+      activeNames: ['1', '2'],
       type: '节点列表',
       now: null,
       error: null
     }
   },
-  components:{
-    links,back
+  components: {
+    links, back
   },
   created() {
     this.$router.push(`/`)
   },
   mounted() {
-    window.ipc=electron.ipcRenderer
+    window.ipc = electron.ipcRenderer
     let ipc = electron.ipcRenderer
     let o = {
       sub: '订阅',
@@ -61,12 +61,12 @@ export default {
 body::-webkit-scrollbar {
   display: none;
 }
-body{
+body {
   margin: 0;
   padding: 0;
   color: #606266;
 }
-.main{
+.main {
   padding: 20px;
   padding-top: 3px;
 }

@@ -14,34 +14,39 @@
 
 <script>
 export default {
+  data(){
+    return {
+      connect:false
+    }
+  },
   mounted() {
     this.closed()
   },
   methods: {
     link() {
-      // let ipc = electron.ipcRenderer
+      let ipc = electron.ipcRenderer
       this.connect = true
       this.$message('已连接')
-      ipc.send('link')
+      // 连接方式
+      ipc.send('link', 'pac')
     },
     close() {
-      // let ipc = electron.ipcRenderer
+      let ipc = electron.ipcRenderer
+      this.connect = false
+      ipc.send('close')
       if (this.connect) {
-        ipc.send('close')
-        this.connect = false
         this.$message('已断开')
       } else this.$message('您还未连接')
     },
     closed() {
       let ipc = electron.ipcRenderer
       ipc.on('closed', (e, arg) => {
-        console.log('closed!')
         this.connect = false
+        arg&&console.log(arg)
       })
     }
   }
 }
-
 </script>
 <style>
 </style>
