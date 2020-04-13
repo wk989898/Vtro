@@ -17,7 +17,9 @@
     const electron= require('electron')
     const { remote } = electron
     const { Menu, MenuItem ,ipcMain} = remote
-    
+    window.onclick = function(e) {
+          document.getElementById('menu').style.height = 0;
+        }
   </script>
   <script src="./lib/bundle.js"></script>
 </body>

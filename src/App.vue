@@ -39,7 +39,7 @@
       let ipc = electron.ipcRenderer
       let o = {
         sub: '订阅',
-        add: '添加',
+        add: '添加节点',
         set: '设置',
         lists: '节点列表'
       }

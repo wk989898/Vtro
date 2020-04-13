@@ -1,52 +1,55 @@
 <template>
   <div>
-    <el-input v-model="sub" placeholder="输入订阅地址"></el-input>
-    <button @click="update">更新订阅</button>
-    <div v-show="confirm">无效的地址~</div>
+    <el-input placeholder="输入订阅地址" v-model="sub" clearable />
+    <el-button plain @click="update">更新订阅</el-button>
+    <div v-show="confirm">无效的地址~~</div>
   </div>
 </template>
 
 <script>
-import Trojan from '../../trojan/trojan'
-export default {
-  data() {
-    return {
-      sub: '',
-      confirm:false
-    }
-  },
-  activated() {
-    let ipc = electron.ipcRenderer
-    if(!this.sub){
-      ipc.send('get-sub')
-    }
-  },
-  mounted(){
-    let ipc = electron.ipcRenderer
-    ipc.on('sub', (e, arg) => {
-      this.sub = arg
-    })
-  },
-  methods: {
-    update() {
+  import Trojan from '../../trojan/trojan'
+  export default {
+    data() {
+      return {
+        sub: '',
+        confirm: false
+      }
+    },
+    activated() {
       let ipc = electron.ipcRenderer
-      this.$axios.get(this.sub).then(res => {
-        let data = this.$global.lists = Trojan.subscribe(res.data)
-        ipc.send('update', { data, sub: this.sub })
-        this.confirm=false
-        this.$router.push('/')
-      }).catch(e => {
-        console.log(e)
-        this.confirm=true
+      if (!this.sub) {
+        ipc.send('get-sub')
+      }
+    },
+    mounted() {
+      let ipc = electron.ipcRenderer
+      ipc.on('sub', (e, arg) => {
+        this.sub = arg
       })
     },
+    methods: {
+      update() {
+        let ipc = electron.ipcRenderer
+        this.$axios.get(this.sub).then(res => {
+          let data = this.$global.lists = Trojan.subscribe(res.data)
+          ipc.send('update', {
+            data,
+            sub: this.sub
+          })
+          this.confirm = false
+          this.$router.push('/')
+        }).catch(e => {
+          console.log(e)
+          this.confirm = true
+        })
+      },
+    }
   }
-}
 </script>
 <style scoped>
-input {
-  height: 50%;
-  width: 70%;
-  display: block;
-}
+  input {
+    height: 50%;
+    width: 70%;
+    display: block;
+  }
 </style>

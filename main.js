@@ -23,8 +23,8 @@ function createWindow() {
   })
   win.loadFile('index.html')
 
-  //  开发者工具?
-  win.webContents.openDevTools()
+  //  开发者工具
+  // win.webContents.openDevTools()
 
   win.on('close', (e) => {
     e.preventDefault()
@@ -220,6 +220,20 @@ ipcMain.on('add-list', (e, r) => {
     })
   })
 })
+// 删除节点
+ipcMain.on('delete-list',(e,ip)=>{
+  fs.readFile('./trojan/lists.json', 'utf-8', (err, res) => {
+    if (err) appendLog(err)
+    let data=JSON.parse(res.toString())
+    data=data.filter(v=>{
+      return v.ip!==ip
+    })
+    fs.writeFile('./trojan/lists.json', JSON.stringify(data), 'utf-8', err => {
+      if (err) appendLog(err)
+      e.reply('deleted')
+    })
+  })
+})
 // ping
 ipcMain.on('all-ping', async (e, hosts) => {
   let arr = []
@@ -230,7 +244,7 @@ ipcMain.on('all-ping', async (e, hosts) => {
     }))
   })).then(res => {
     res.forEach(v => {
-      if (v.avg === 'unknown') v.avg = 99999
+      if (v.avg === 'unknown') v.avg = -1
       arr.push(parseInt(v.avg))
     })
     e.reply('ping-result', arr)
@@ -255,7 +269,7 @@ const template = [
     label: '设置节点',
     submenu: [
       { id: 'sub', label: '订阅' },
-      { id: 'add', label: '手动添加' },
+      { id: 'add', label: '添加节点' },
       { id: 'lists', label: '节点列表' },
       { id: 'ping', label: 'ping' }
     ]
