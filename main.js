@@ -23,9 +23,6 @@ function createWindow() {
   })
   win.loadFile('index.html')
 
-  //  开发者工具
-  // win.webContents.openDevTools()
-
   win.on('close', (e) => {
     e.preventDefault()
     win.hide()
@@ -35,16 +32,19 @@ function createWindow() {
 app.name = "Vtro"
 app.on('ready', () => {
   createWindow()
+  //  开发者工具
+  !app.isPackaged&&win.webContents.openDevTools()
   // tray 
   tray = new Tray('./tray.ico')
-  const contextMenu = Menu.buildFromTemplate([
+  let traylist=[
     {
       label: '退出',
       click() {
         app.exit()
       }
     },
-  ])
+  ]
+  const contextMenu = Menu.buildFromTemplate(traylist)
   tray.setToolTip('Vtro')
   tray.setContextMenu(contextMenu)
   tray.on('click', () => {
@@ -115,8 +115,8 @@ function allquit() {
 ipcMain.once('getnow', (e, r) => {
   fs.readFile('./trojan/now.json', 'utf-8', (err, res) => {
     if (err) appendLog(err)
-    let data = JSON.parse(res)
-    let name = data && data.name
+    if(!res) return e.reply('setnow','')
+    let name = JSON.parse(res).name
     e.reply('setnow', name ? name : '')
   })
 })

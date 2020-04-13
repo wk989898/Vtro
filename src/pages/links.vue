@@ -41,7 +41,7 @@
       },
       setnow(ipc){
         ipc.once('setnow',(e,arg)=>{
-          this.now=arg
+          arg&&(this.now=arg)
         })
       },
       link() {
