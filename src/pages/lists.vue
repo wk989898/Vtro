@@ -1,13 +1,14 @@
 <template>
   <div class="lists">
     <!-- <div v-for="(item,index) in lists" :key="item.ip"
-             @dblclick="select(index)" @click="i=index" 
-             :class="[{active:idx===index},{hover:i===index},'list']">
-              <i class="el-icon-check" v-show="idx===index"></i>
-              <span :title="item.name?`ip：${item.addr}\nport:${item.port}`:item">
-                {{item.name||item}}</span>
-            </div> -->
-    <el-table :data="lists" border style="width: 100%" highlight-current-row @current-change="select">
+                 @dblclick="select(index)" @click="i=index" 
+                 :class="[{active:idx===index},{hover:i===index},'list']">
+                  <i class="el-icon-check" v-show="idx===index"></i>
+                  <span :title="item.name?`ip：${item.addr}\nport:${item.port}`:item">
+                    {{item.name||item}}</span>
+                </div> -->
+    <el-table :data="lists" border style="width: 100%" highlight-current-row 
+    @row-dblclick="select" @row-contextmenu="contextmenu">
       <el-table-column prop="ip" label="ip" width="180">
       </el-table-column>
       <el-table-column prop="name" label="名称" width="180">
@@ -35,12 +36,15 @@
         this.lists = this.$global.lists = arg
       })
       ipc.on('ping', e => {
+        this.lists.map(list=>{
+          list.ping='wait'
+        })
         ipc.send('all-ping', this.lists)
       })
       ipc.on('ping-result', (e, arg) => {
-        // this.pings = arg
-        console.log(arg)
-        ipc.send('get-lists')
+        this.lists.map((list,index)=>{
+          list.ping=arg[index]
+        })
       })
     },
     activated() {
@@ -54,9 +58,14 @@
     methods: {
       select(e) {
         let ipc = electron.ipcRenderer
-        ipc.send('change-list', e)
-        ipc.send('close')
-        this.$emit('makenow', e.name)
+        // setTimeout(() => {
+          ipc.send('change-linklist', e)
+          ipc.send('close')
+          this.$emit('makenow', e.name)
+        // }, 1000);
+      },
+      contextmenu(e){
+        console.log(e)
       }
     }
   }

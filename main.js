@@ -3,10 +3,13 @@ const path = require('path')
 const fs = require('fs')
 const cp = require('child_process')
 const http = require('http')
+const process=require('process')
 var ping = require('ping')
 
 
-var win, tray, trojan, privo
+var win, tray, trojan, privo,privoxypid,trojanpid
+const server = http.createServer()
+
 
 function createWindow() {
   // Create the browser window.
@@ -20,7 +23,7 @@ function createWindow() {
   })
   win.loadFile('index.html')
 
-  //  开发者工具
+  //  开发者工具?
   win.webContents.openDevTools()
 
   win.on('close', (e) => {
@@ -51,7 +54,7 @@ app.on('ready', () => {
 })
 
 app.on('before-quit', () => {
-  server.close()
+  allquit()
 })
 // Quit when all windows are closed.
 app.on('window-all-closed', function (event) {
@@ -65,14 +68,12 @@ app.on('activate', function () {
   if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
-/** 监听事件 */
 // 添加日志
 function appendLog(err, path) {
   if (path === null || path === undefined) path = './trojan/log.txt'
   fs.appendFile(path, err + '\n', 'utf-8', () => { })
 }
 // 设置pac代理
-const server = http.createServer()
 server.on('request', (req, res) => {
   if (req.url === '/pac') {
     res.setHeader('Content-Type', 'application/x-ns-proxy-autoconfig')
@@ -82,8 +83,8 @@ server.on('request', (req, res) => {
     })
   }
 })
-function makeproxy(type, arg) {
-  cp.execFile('./sysproxy.exe', [type, arg], {
+function makeproxy(type, arg, list) {
+  cp.execFile('./sysproxy.exe', [type, arg, list], {
     cwd: './proxy',
     windowsHide: true
   }, (err, stdout, stderr) => {
@@ -96,25 +97,32 @@ function privoxy() {
   privo = cp.execFile('./privoxy.exe', {
     cwd: './proxy',
     windowsHide: true
-  }, (err, stdout, stderr) => {
-    if (err) appendLog(err) && server.close()
-    if (stderr) appendLog(stderr)
+    // shell: true,
+  }, (err) => {
+    let log='privoxy error!has you close privoxy?\nplease check http://localhost:1081'
+    if (err) appendLog(log) && server.close()
   })
+  privoxypid=privo.pid
 }
+// 退出
+function allquit() {
+  trojan && trojan.kill()
+  privo && privo.kill()
+  server.listening && server.close()
+}
+/** 监听事件 */
+// 获取当前节点
+ipcMain.once('getnow', (e, r) => {
+  fs.readFile('./trojan/now.json', 'utf-8', (err, res) => {
+    if (err) appendLog(err)
+    let data = JSON.parse(res)
+    let name = data && data.name
+    e.reply('setnow', name ? name : '')
+  })
+})
 // 连接
 ipcMain.on('link', (e, type) => {
-  let arg = ''
-  if (type === 'proxy') {
-    arg = ''
-  } else if (type === 'pac') {
-    arg = `http://127.0.0.1:1082/pac`
-    !server.listening && server.listen(1082, '127.0.0.1', () => {
-      makeproxy(type, arg)
-      privo && privo.kill()
-      privoxy()
-    })
-  } else arg = ''
-
+  allquit()
   trojan = cp.execFile('trojan.exe', {
     cwd: './trojan',
     windowsHide: true
@@ -124,17 +132,35 @@ ipcMain.on('link', (e, type) => {
     e.reply('closed', { err: err ? err : stderr ? stderr : null })
     console.log('link is closed')
   })
+  trojanpid=trojan.pid
+  let arg = ''
+  if (type === 'global') {
+    arg = `http://127.0.0.1:1081`
+    let list = `localhost;127.*`
+    makeproxy(type, arg, list)
+    privoxy()
+  } else if (type === 'pac') {
+    // 默认
+    arg = `http://127.0.0.1:1082/pac`
+    !server.listening && server.listen(1082, '127.0.0.1', () => {
+      makeproxy(type, arg)
+      privoxy()
+    })
+  } else makeproxy('set', 1)
 })
 // 关闭
 ipcMain.on('close', (e, r) => {
-  trojan && trojan.kill()
-  server.listening && server.close()
-  privo && privo.kill()
+  allquit()
 })
 // 更改连接节点
-ipcMain.on('change-list', (e, r) => {
+ipcMain.on('change-linklist', (e, r) => {
   fs.readFile('./trojan/config.json', 'utf-8', (err, res) => {
     if (err) appendLog(err)
+    if (!r) return;
+    fs.writeFile('./trojan/now.json', JSON.stringify(r), 'utf-8', err => {
+      if (err) appendLog(err)
+    })
+
     let data = JSON.parse(res.toString())
     // password,addr,port,
     data.remote_addr = r.addr
@@ -197,28 +223,32 @@ ipcMain.on('add-list', (e, r) => {
 // ping
 ipcMain.on('all-ping', async (e, hosts) => {
   let arr = []
-  for (let list of hosts) {
-    let res = await ping.promise.probe(list.addr, {
-      timeout: 10,
+  //
+  Promise.all(hosts.map(host => {
+    return Promise.resolve(ping.promise.probe(host.addr, {
+      timeout: 10
+    }))
+  })).then(res => {
+    res.forEach(v => {
+      if (v.avg === 'unknown') v.avg = 99999
+      arr.push(parseInt(v.avg))
     })
-    if(res.avg==='unknown') res.avg=0
-    arr.push(parseInt(res.avg))
-  }
-  fs.readFile('./trojan/lists.json', 'utf-8', (err, res) => {
-    if (err) appendLog(err)
-    let data = JSON.parse(res.toString()) || []
-    for(let i in data){
-      data[i]['ping']=arr[i]
-    }
-    fs.writeFile('./trojan/lists.json', JSON.stringify(data), 'utf-8', err => {
+    e.reply('ping-result', arr)
+    fs.readFile('./trojan/lists.json', 'utf-8', (err, res) => {
       if (err) appendLog(err)
+      let data = JSON.parse(res.toString()) || []
+      for (let i in data) {
+        data[i]['ping'] = arr[i]
+      }
+      fs.writeFile('./trojan/lists.json', JSON.stringify(data), 'utf-8', err => {
+        if (err) appendLog(err)
+      })
     })
-  })
-  e.reply('ping-result', arr)
+  }).catch(e => { appendLog(e) })
 })
 
 
-// 菜单栏
+// 菜单
 const template = [
   {
     id: 'list',
@@ -226,15 +256,9 @@ const template = [
     submenu: [
       { id: 'sub', label: '订阅' },
       { id: 'add', label: '手动添加' },
-      { id: 'lists', label: '节点列表' }
+      { id: 'lists', label: '节点列表' },
+      { id: 'ping', label: 'ping' }
     ]
-  },
-  {
-    id: 'ping',
-    label: 'ping',
-    click() {
-      send('ping')
-    }
   },
   {
     id: 'set',
@@ -275,7 +299,6 @@ function send(channel, args) {
 menu.items.forEach(value => {
   let child = value.submenu
   if (value.id === 'log') return;
-  if (value.id === 'ping') return;
   if (child) {
     child.items.forEach(val => {
       val.click = () => {

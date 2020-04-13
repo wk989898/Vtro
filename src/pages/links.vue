@@ -24,17 +24,33 @@
         connect: false
       }
     },
+    watch:{
+      proxy:function(){
+        this.connect=false
+      }
+    },
     mounted() {
-      this.closed()
+      let ipc = electron.ipcRenderer
+      this.closed(ipc)
+      this.getnow(ipc)
+      this.setnow(ipc)
     },
     methods: {
+      getnow(ipc){
+      ipc.send('getnow')
+      },
+      setnow(ipc){
+        ipc.once('setnow',(e,arg)=>{
+          this.now=arg
+        })
+      },
       link() {
         let ipc = electron.ipcRenderer
         this.connect = true
         this.$message('已连接')
         // 连接方式
         console.log(this.proxy)
-        ipc.send('link', 'pac')
+        ipc.send('link', this.proxy)
       },
       close() {
         let ipc = electron.ipcRenderer
@@ -44,10 +60,8 @@
           this.$message('已断开')
         } else this.$message('您还未连接')
       },
-      closed() {
-        let ipc = electron.ipcRenderer
+      closed(ipc) {
         ipc.on('closed', (e, arg) => {
-          this.connect = false
           arg && console.log(arg.err.message)
         })
       }

@@ -2,7 +2,7 @@
 
 ## 介绍
 
-一个非常简单的关于 trojan 的 windows 图形界面
+一个的关于 trojan 的 windows 图形界面
 
 ## 注意
 

@@ -1,6 +1,6 @@
 {
   "name": "vtro",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A simple trojan GUI",
   "main": "main.js",
   "build": {
@@ -54,6 +54,7 @@
   },
   "dependencies": {
     "axios": "^0.19.2",
+    "bluebird": "^3.7.2",
     "element-ui": "^2.13.0",
     "file-loader": "^6.0.0",
     "ping": "^0.2.3",

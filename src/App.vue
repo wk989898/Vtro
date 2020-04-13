@@ -56,7 +56,6 @@
         this.mode = e
       },
       changenow(e){
-        console.log(e)
         this.now=e
       }
     }
