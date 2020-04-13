@@ -9,9 +9,9 @@
 - 必须解压运行 !!!  
   `如果不解压运行,会出现报错,需要重启电脑重新运行`
 - 可以订阅和添加节点
-- 默认为pac(暂不支持更改)
-- 目前不支持 ping,设置等
+- ~~默认为pac(暂不支持更改)~~
+- ~~目前不支持 ping,设置等~~ `ping会有点慢`
 
 ## 下载
 
-[点击这里](https://github.com/saywhere/Vtro/releases/)
+[点击这里](https://github.com/wk989898/Vtro/releases/)

@@ -6,11 +6,18 @@
   "build": {
     "productName": "Vtro",
     "asar": false,
-    "compression": "store",
     "win": {
       "target": [
-        "zip"
+        {
+          "target": "zip",
+          "arch": [
+            "ia32",
+            "x64"
+          ]
+        }
       ]
+    },
+    "directories": {
     },
     "extraFiles": [
       "tray.ico",
@@ -32,14 +39,14 @@
     "webpack": "webpack --config ./src/config/webpack.config.js",
     "watch": "webpack --config ./src/config/webpack.config.js --watch",
     "packager": "electron-packager .  Vtro  --out ./ --overwrite --ignore=node_modules",
-    "dist": "electron-builder --win --x64"
+    "dist": "electron-builder --win "
   },
-  "repository": "https://github.com/saywhere/Vtro",
+  "repository": "https://github.com/wk989898/Vtro",
   "keywords": [
     "Electron",
     "trojan",
     "GUI",
-    "demo"
+    "client"
   ],
   "author": "wk989898",
   "license": "ISC",
@@ -54,7 +61,6 @@
   },
   "dependencies": {
     "axios": "^0.19.2",
-    "bluebird": "^3.7.2",
     "element-ui": "^2.13.0",
     "file-loader": "^6.0.0",
     "ping": "^0.2.3",
