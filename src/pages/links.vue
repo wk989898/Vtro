@@ -24,9 +24,9 @@
         connect: false
       }
     },
-    watch:{
-      proxy:function(){
-        this.connect=false
+    watch: {
+      proxy: function() {
+        this.connect = false
       }
     },
     mounted() {
@@ -34,22 +34,22 @@
       this.closed(ipc)
       this.getnow(ipc)
       this.setnow(ipc)
+      ipc.on('linked', () => {
+        this.connect = true
+        this.$message('已连接')
+      })
     },
     methods: {
-      getnow(ipc){
-      ipc.send('getnow')
+      getnow(ipc) {
+        ipc.send('getnow')
       },
-      setnow(ipc){
-        ipc.once('setnow',(e,arg)=>{
-          arg&&(this.now=arg)
+      setnow(ipc) {
+        ipc.once('setnow', (e, arg) => {
+          arg && (this.now = this.$global.now = arg)
         })
       },
       link() {
         let ipc = electron.ipcRenderer
-        this.connect = true
-        this.$message('已连接')
-        // 连接方式
-        console.log(this.proxy)
         ipc.send('link', this.proxy)
       },
       close() {

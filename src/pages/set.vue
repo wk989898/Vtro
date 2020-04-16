@@ -23,6 +23,7 @@
       'radio': function(newval) {
         let ipc = electron.ipcRenderer
         this.$emit('changeproxy',newval)
+        ipc.send('link',newval)
       }
     }
   }

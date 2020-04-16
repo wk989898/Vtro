@@ -6,7 +6,7 @@
   <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
   <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'"> -->
-  
+
   <title>Vtro - a trojan gui</title>
 </head>
 
@@ -14,12 +14,19 @@
   <div id="app"></div>
   <!-- You can also require other files to run in this process -->
   <script>
-    const electron= require('electron')
-    const { remote } = electron
-    const { Menu, MenuItem ,ipcMain} = remote
-    window.onclick = function(e) {
-          document.getElementById('menu').style.height = 0;
-        }
+    const electron = require('electron')
+    const {
+      remote
+    } = electron
+    const {
+      Menu,
+      MenuItem,
+      ipcMain
+    } = remote
+    window.onclick = function (e) {
+      let menu = document.getElementById('menu')
+      if (menu) menu.style.height = 0
+    }
   </script>
   <script src="./lib/bundle.js"></script>
 </body>

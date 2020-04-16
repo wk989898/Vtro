@@ -3,11 +3,11 @@ const path = require('path')
 const fs = require('fs')
 const cp = require('child_process')
 const http = require('http')
-const process=require('process')
+const process = require('process')
 var ping = require('ping')
 
 
-var win, tray, trojan, privo,privoxypid,trojanpid
+var win, tray, trojan, privo, privoxypid, trojanpid
 const server = http.createServer()
 
 
@@ -33,16 +33,16 @@ app.name = "Vtro"
 app.on('ready', () => {
   createWindow()
   //  开发者工具
-  !app.isPackaged&&win.webContents.openDevTools()
+  !app.isPackaged && win.webContents.openDevTools()
   // tray 
-  tray = new Tray('./tray.ico')
-  let traylist=[
+  tray = new Tray(path.resolve('./tray.ico'))
+  let traylist = [
     {
       label: '退出',
       click() {
         app.exit()
       }
-    },
+    }
   ]
   const contextMenu = Menu.buildFromTemplate(traylist)
   tray.setToolTip('Vtro')
@@ -50,7 +50,6 @@ app.on('ready', () => {
   tray.on('click', () => {
     !win.isVisible() && win.show()
   })
-
 })
 
 app.on('before-quit', () => {
@@ -99,10 +98,10 @@ function privoxy() {
     windowsHide: true
     // shell: true,
   }, (err) => {
-    let log='privoxy error!has you close privoxy?\nplease check http://localhost:1081'
+    let log = 'privoxy error!has you close privoxy?\nplease check http://localhost:1081'
     if (err) appendLog(log) && server.close()
   })
-  privoxypid=privo.pid
+  privoxypid = privo.pid
 }
 // 退出
 function allquit() {
@@ -110,12 +109,44 @@ function allquit() {
   privo && privo.kill()
   server.listening && server.close()
 }
+// 添加文件
+function addfile(name, chunk, cb) {
+  fs.readFile(name, 'utf-8', (err, res) => {
+    if (err) appendLog(err)
+    let data = JSON.parse(res.toString()) || []
+    if (cb) cb(data)
+    else if (chunk) {
+      try {
+        data.unshift(chunk)
+      } catch{
+        data = []
+        data.unshift(chunk)
+      }
+    } else appendLog(`no chunk or callback paramater in addfile func`)
+    fs.writeFile(name, JSON.stringify(data), e => { e && appendLog(e) })
+  })
+}
+// 删除数据
+function deleteData(name, type, condition) {
+  fs.readFile(name, 'utf-8', (err, res) => {
+    if (err) appendLog(err)
+    let data = JSON.parse(res.toString())
+    data = data.filter(v => {
+      // return v.ip !== ip
+      // return v===r
+      return condition(v)
+    })
+    fs.writeFile(name, JSON.stringify(data), 'utf-8', err => {
+      if (err) appendLog(err)
+    })
+  })
+}
 /** 监听事件 */
 // 获取当前节点
 ipcMain.once('getnow', (e, r) => {
   fs.readFile('./trojan/now.json', 'utf-8', (err, res) => {
     if (err) appendLog(err)
-    if(!res) return e.reply('setnow','')
+    if (!res) return e.reply('setnow', '')
     let name = JSON.parse(res).name
     e.reply('setnow', name ? name : '')
   })
@@ -130,9 +161,9 @@ ipcMain.on('link', (e, type) => {
     if (err) appendLog(stderr, './trojan/trojanlog.txt')
     if (stderr) appendLog(stderr, './trojan/trojanlog.txt')
     e.reply('closed', { err: err ? err : stderr ? stderr : null })
-    console.log('link is closed')
+    return console.log('link is closed')
   })
-  trojanpid=trojan.pid
+  trojanpid = trojan.pid
   let arg = ''
   if (type === 'global') {
     arg = `http://127.0.0.1:1081`
@@ -147,6 +178,7 @@ ipcMain.on('link', (e, type) => {
       privoxy()
     })
   } else makeproxy('set', 1)
+  e.reply('linked')
 })
 // 关闭
 ipcMain.on('close', (e, r) => {
@@ -154,13 +186,12 @@ ipcMain.on('close', (e, r) => {
 })
 // 更改连接节点
 ipcMain.on('change-linklist', (e, r) => {
+  if (!r) return;
   fs.readFile('./trojan/config.json', 'utf-8', (err, res) => {
     if (err) appendLog(err)
-    if (!r) return;
     fs.writeFile('./trojan/now.json', JSON.stringify(r), 'utf-8', err => {
       if (err) appendLog(err)
     })
-
     let data = JSON.parse(res.toString())
     // password,addr,port,
     data.remote_addr = r.addr
@@ -173,20 +204,16 @@ ipcMain.on('change-linklist', (e, r) => {
 })
 // 获取订阅
 ipcMain.on('get-sub', e => {
-  fs.readFile('./trojan/sub.txt', (err, r) => {
-    if (err) {
-      appendLog(err)
-      return;
-    }
-    r && e.reply('sub', r.toString())
+  fs.readFile('./trojan/sub.json', (err, r) => {
+    if (err) return appendLog(err)
+    let data = JSON.parse(r.toString()) || []
+    r && e.reply('sub', data)
   })
 })
 // 更新节点
 ipcMain.on('update', (e, r) => {
-  fs.writeFile('./trojan/sub.txt', r.sub, () => { })
-  fs.writeFile('./trojan/lists.json', JSON.stringify(r.data), 'utf-8', err => {
-    if (err) appendLog(err)
-  })
+  addfile('./trojan/sub.json', r.sub)
+  addfile('./trojan/lists.json', r.data)
 })
 // 获取节点
 ipcMain.on('get-lists', (e, r) => {
@@ -206,58 +233,52 @@ ipcMain.on('get-lists', (e, r) => {
 })
 // 手动添加节点
 ipcMain.on('add-list', (e, r) => {
-  fs.readFile('./trojan/lists.json', 'utf-8', (err, res) => {
-    if (err) appendLog(err)
-    let data = JSON.parse(res.toString()) || []
-    try {
-      data.unshift(r.data)
-    } catch{
-      data = []
-      data.unshift(r.data)
-    }
-    fs.writeFile('./trojan/lists.json', JSON.stringify(data), 'utf-8', err => {
-      if (err) appendLog(err)
-    })
-  })
+  addfile('./trojan/lists.json', r.data)
 })
 // 删除节点
-ipcMain.on('delete-list',(e,ip)=>{
-  fs.readFile('./trojan/lists.json', 'utf-8', (err, res) => {
-    if (err) appendLog(err)
-    let data=JSON.parse(res.toString())
-    data=data.filter(v=>{
-      return v.ip!==ip
-    })
-    fs.writeFile('./trojan/lists.json', JSON.stringify(data), 'utf-8', err => {
-      if (err) appendLog(err)
-      e.reply('deleted')
-    })
+ipcMain.on('delete-list', (e, ip) => {
+  deleteData('./trojan/lists.json', 'list', v => {
+    return v.ip !== ip
   })
+  e.reply('deleted')
+})
+// 删除订阅
+ipcMain.on('remove-sub', (e, sub) => {
+  deleteData('./trojan/sub.json', 'sub', v => {
+    return v !== sub
+  })
+  e.reply('removed')
 })
 // ping
 ipcMain.on('all-ping', async (e, hosts) => {
   let arr = []
-  //
+
   Promise.all(hosts.map(host => {
     return Promise.resolve(ping.promise.probe(host.addr, {
-      timeout: 10
+      timeout: 5
     }))
   })).then(res => {
     res.forEach(v => {
       if (v.avg === 'unknown') v.avg = -1
       arr.push(parseInt(v.avg))
     })
+
     e.reply('ping-result', arr)
-    fs.readFile('./trojan/lists.json', 'utf-8', (err, res) => {
-      if (err) appendLog(err)
-      let data = JSON.parse(res.toString()) || []
+    addfile('./trojan/lists.json', null, data => {
       for (let i in data) {
         data[i]['ping'] = arr[i]
       }
-      fs.writeFile('./trojan/lists.json', JSON.stringify(data), 'utf-8', err => {
-        if (err) appendLog(err)
-      })
     })
+    // fs.readFile('./trojan/lists.json', 'utf-8', (err, res) => {
+    //   if (err) appendLog(err)
+    //   let data = JSON.parse(res.toString()) || []
+    //   for (let i in data) {
+    //     data[i]['ping'] = arr[i]
+    //   }
+    //   fs.writeFile('./trojan/lists.json', JSON.stringify(data), 'utf-8', err => {
+    //     if (err) appendLog(err)
+    //   })
+    // })
   }).catch(e => { appendLog(e) })
 })
 
@@ -300,8 +321,26 @@ const template = [
         }
       },
     ]
-
-  }
+  },
+  /**
+   *  {
+    type: 'checkbox',
+    label: '开机启动',
+    checked: app.getLoginItemSettings().openAtLogin,
+    click(){
+      if (!app.isPackaged) {
+        app.setLoginItemSettings({
+          openAtLogin: !app.getLoginItemSettings().openAtLogin,
+          path: process.execPath
+        })
+      } else {
+        app.setLoginItemSettings({
+          openAtLogin: !app.getLoginItemSettings().openAtLogin
+        })
+      }
+    }
+  },
+   */
 ]
 const menu = Menu.buildFromTemplate(template)
 Menu.setApplicationMenu(menu)

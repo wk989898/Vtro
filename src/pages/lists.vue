@@ -1,12 +1,5 @@
 <template>
   <div class="lists">
-    <!-- <div v-for="(item,index) in lists" :key="item.ip"
-                         @dblclick="select(index)" @click="i=index" 
-                         :class="[{active:idx===index},{hover:i===index},'list']">
-                          <i class="el-icon-check" v-show="idx===index"></i>
-                          <span :title="item.name?`ip：${item.addr}\nport:${item.port}`:item">
-                            {{item.name||item}}</span>
-                        </div> -->
     <el-table :data="lists" border style="width: 100%" highlight-current-row @row-dblclick="select" @row-contextmenu="contextmenu">
       <el-table-column prop="ip" label="ip" width="180">
       </el-table-column>
@@ -20,11 +13,11 @@
       </el-table-column>
     </el-table>
     <div id="menu" ref="meun">
-      <div class="menu" @click="deletelist">删除</div>
-      <div class="menu"></div>
-      <div class="menu"></div>
-      <div class="menu"></div>
-      <div class="menu"></div>
+      <div class="menu" @click="deletelist">删除</div >
+      <div class="menu"></div >
+      <div  class="menu"></div >
+      <div  class="menu"></div >
+      <div  class="menu"></div >
     </div>
   </div>
 </template>
@@ -53,8 +46,7 @@
           list.ping = arg[index]
         })
       })
-      ipc.on('deleted', e => {
-        console.log('deleted')
+      ipc.on('deleted', (e,arg) => {
         ipc.send('get-lists')
       })
     },
@@ -82,7 +74,6 @@
       },
       deletelist(e) {
         e.stopPropagation()
-        console.log(this.id)
         let ipc = electron.ipcRenderer
         ipc.send('delete-list', this.id)
         this.$refs.meun.style.height = '0'
@@ -113,6 +104,6 @@
     padding: 0 10px;
   }
   #menu .menu:hover {
-    background: #aaa;
+    background: #ccc;
   }
 </style>
