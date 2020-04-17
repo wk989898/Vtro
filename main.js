@@ -118,7 +118,9 @@ function allquit() {
 function addfile(name, chunk, cb) {
   fs.readFile(name, 'utf-8', (err, res) => {
     if (err) appendLog(err)
-    let data = JSON.parse(res.toString()) || []
+    let data
+    if (!res) data = []
+    data = JSON.parse(res.toString()) || []
     if (cb) cb(data)
     else if (chunk) {
       try {
@@ -135,6 +137,7 @@ function addfile(name, chunk, cb) {
 function deleteData(name, type, condition) {
   fs.readFile(name, 'utf-8', (err, res) => {
     if (err) appendLog(err)
+    if (!res) return;
     let data = JSON.parse(res.toString())
     data = data.filter(v => {
       // return v.ip !== ip

@@ -27,7 +27,8 @@
     data() {
       return {
         lists: null,
-        id: null
+        id: null,
+        tr:null
       }
     },
     mounted() {
@@ -59,11 +60,14 @@
       this.$forceUpdate()
     },
     methods: {
-      select(e) {
+      select(e,r,ele) {
+        this.tr&&(this.tr.style.backgroundColor='')
         let ipc = electron.ipcRenderer
         ipc.send('change-linklist', e)
         ipc.send('close')
         this.$emit('makenow', e.name)
+        this.tr=ele.target.parentElement.parentElement
+        this.tr.style.backgroundColor='#409EFF'
       },
       contextmenu(r, d, e) {
         let meun = this.$refs.meun
@@ -81,7 +85,7 @@
     }
   }
 </script>
-<style scoped>
+<style>
   .lists {
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
     margin: 10px;
@@ -105,5 +109,7 @@
   }
   #menu .menu:hover {
     background: #ccc;
+  }
+  .select{
   }
 </style>

@@ -2,7 +2,7 @@
 
 ## 介绍
 
- trojan 的 windows 图形界面
+trojan 的 windows 图形界面
 
 ## 注意
 
@@ -13,4 +13,4 @@
 
 ## 下载
 
-### <div style="display:inline-block;transform:translate(0,10px) scale(0.8);margin:5px">![Vtro](./tray.ico)</div> [点击这里](https://github.com/wk989898/Vtro/releases/)
+[点击这里](https://github.com/wk989898/Vtro/releases/)&nbsp;&nbsp;&nbsp;![Vtro](./tray.ico)
