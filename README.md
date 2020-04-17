@@ -13,4 +13,4 @@
 
 ## 下载
 
-###  [点击这里](https://github.com/wk989898/Vtro/releases/) <span style="display:inline-block;transform:translate(0,10px);margin:5px"><img src="tray.ico"/></span>
+###  [点击这里](https://github.com/wk989898/Vtro/releases/)<span style="display:inline-block;transform:translate(0,10px);margin:5px"><img src="tray.ico"/></span>
