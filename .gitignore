@@ -1,3 +1,5 @@
 node_modules
 trojan
 dist
+*.png
+256.ico

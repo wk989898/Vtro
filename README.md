@@ -1,17 +1,16 @@
-# Vtro(开发中)
+# Vtro
 
 ## 介绍
 
-一个的关于 trojan 的 windows 图形界面
+ trojan 的 windows 图形界面
 
 ## 注意
 
-- 必须解压运行 !!!  
-  `如果不解压运行,会出现报错,需要重启电脑重新运行`
 - 可以订阅和添加节点
-- ~~默认为pac(暂不支持更改)~~
-- ~~目前不支持 ping,设置等~~ `ping会有点慢`
+- 暂时无法更改节点选项,可以删除后再添加
+- ~~目前不支持 ping 等~~  
+  `只能ping全部节点,会有点慢`
 
 ## 下载
 
-[点击这里](https://github.com/wk989898/Vtro/releases/)
+### <div style="display:inline-block;transform:translate(0,10px) scale(0.8);margin:5px">![Vtro](./tray.ico)</div> [点击这里](https://github.com/wk989898/Vtro/releases/)

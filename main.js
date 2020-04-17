@@ -9,6 +9,7 @@ var ping = require('ping')
 
 var win, tray, trojan, privo, privoxypid, trojanpid
 const server = http.createServer()
+const resourcesPath = path.resolve(process.resourcesPath)
 
 
 function createWindow() {
@@ -29,13 +30,17 @@ function createWindow() {
   })
 }
 
+
 app.name = "Vtro"
 app.on('ready', () => {
   createWindow()
   //  开发者工具
-  !app.isPackaged && win.webContents.openDevTools()
-  // tray 
-  tray = new Tray(path.resolve('./tray.ico'))
+  const isPackaged = app.isPackaged
+  !isPackaged && win.webContents.openDevTools()
+  // tray 路径为运行时路径 ./resource
+  tray = new Tray(
+    isPackaged ? path.resolve(resourcesPath, 'tray.ico') : 'tray.ico'
+  )
   let traylist = [
     {
       label: '退出',
@@ -269,16 +274,6 @@ ipcMain.on('all-ping', async (e, hosts) => {
         data[i]['ping'] = arr[i]
       }
     })
-    // fs.readFile('./trojan/lists.json', 'utf-8', (err, res) => {
-    //   if (err) appendLog(err)
-    //   let data = JSON.parse(res.toString()) || []
-    //   for (let i in data) {
-    //     data[i]['ping'] = arr[i]
-    //   }
-    //   fs.writeFile('./trojan/lists.json', JSON.stringify(data), 'utf-8', err => {
-    //     if (err) appendLog(err)
-    //   })
-    // })
   }).catch(e => { appendLog(e) })
 })
 

@@ -1,6 +1,6 @@
 {
   "name": "vtro",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A simple trojan GUI",
   "main": "main.js",
   "build": {
@@ -10,16 +10,15 @@
         {
           "target": "zip",
           "arch": [
-            "ia32",
-            "x64"
+            "x64",
+            "ia32"
           ]
         }
-      ]
+      ],
+      "icon":"256.ico"
     },
-    "directories": {
-    },
+    "extraResources":[ "tray.ico"],
     "extraFiles": [
-      "tray.ico",
       "proxy/",
       {
         "from": "extra-trojan/",
