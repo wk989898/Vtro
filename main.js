@@ -261,28 +261,63 @@ ipcMain.on('remove-sub', (e, sub) => {
 ipcMain.on('all-ping', async (e, hosts) => {
   let arr = []
 
-  Promise.all(hosts.map(host => {
-    return Promise.resolve(ping.promise.probe(host.addr, {
-      timeout: 5
-    }))
-  })).then(res => {
-    res.forEach(v => {
-      if (v.avg === 'unknown') v.avg = -1
-      arr.push(parseInt(v.avg))
-    })
+  // async function PromiseAll(limit, array, cb) {
+  //   if (array.length == 0 || limit <= 0) return;
+  //   const list = [].concat(array)
+  //   let tem, index, count = limit
+  //   // max limit
+  //   let Promises = list.splice(0, limit).map((v, i) => {
+  //     // cb should be  a promise
+  //     return Promise.resolve(cb(v, i, i))
+  //   })
 
-    e.reply('ping-result', arr)
-    addfile('./trojan/lists.json', null, data => {
-      for (let i in data) {
-        data[i]['ping'] = arr[i]
-      }
+  //   while (list.length > 0) {
+  //     index = await Promise.race(Promises)
+  //     tem = list.shift()
+  //     count++
+  //     Promises[index] = cb(tem, index, count)
+  //   }
+  //   await Promise.all(Promises)
+  // }
+
+  const start = Date.now()
+  await Promise.all(hosts.map(host => {
+    return ping.promise.probe(host.addr, {
+      timeout: 10
     })
-  }).catch(e => { appendLog(e) })
+  })).then(res => {
+    res.forEach((v, i) => {
+      if (v.avg === 'unknown') v.avg = -1
+      arr[i] = parseInt(v.avg)
+    })
+  }).catch(e => {
+    appendLog(e)
+  })
+
+  // idx 数组下标 index count计数 
+  // await PromiseAll(45, hosts, (host, index, count) => {
+  //   return ping.promise.probe(host.addr||host.ip, {
+  //     timeout: 5
+  //   }).then(res => {
+  //     if (res.avg === 'unknown') res.avg = -1
+  //     arr[count] = parseInt(res.avg)||-1
+  //     return index
+  //   })
+  // })
+  console.log(arr)
+  console.log(`ping cost:${Date.now() - start}ms\nnum:${arr.length}`)
+
+  e.reply('ping-result', arr)
+  addfile('./trojan/lists.json', null, data => {
+    for (let i in data) {
+      data[i]['ping'] = arr[i]
+    }
+  })
 })
 
 
 // 菜单
-const template = [
+var template = [
   {
     id: 'list',
     label: '设置节点',
@@ -340,6 +375,13 @@ const template = [
   },
    */
 ]
+if (!app.isPackaged) {
+  template.push({
+    id: 'refresh',
+    label: 'refresh',
+    role: 'forceReload'
+  })
+}
 const menu = Menu.buildFromTemplate(template)
 Menu.setApplicationMenu(menu)
 
@@ -350,6 +392,7 @@ function send(channel, args) {
 menu.items.forEach(value => {
   let child = value.submenu
   if (value.id === 'log') return;
+  if (value.id === 'refresh') return;
   if (child) {
     child.items.forEach(val => {
       val.click = () => {

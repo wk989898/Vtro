@@ -46,6 +46,7 @@
         this.lists.map((list, index) => {
           list.ping = arg[index]
         })
+        this.$forceUpdate()
       })
       ipc.on('deleted', (e,arg) => {
         ipc.send('get-lists')
