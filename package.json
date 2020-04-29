@@ -1,6 +1,6 @@
 {
   "name": "vtro",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A simple trojan GUI",
   "main": "main.js",
   "build": {
@@ -39,11 +39,10 @@
     "start": "electron . ",
     "webpack": "webpack --config ./src/config/webpack.config.js",
     "rollup": "rollup -c -m",
-    "build":"webpack --config ./src/config/webpack.config.js&&rollup -c -m",
+    "build": "webpack --config ./src/config/webpack.config.js&&rollup -c -m",
     "watch": "webpack --config ./src/config/webpack.config.js --watch",
-    "packager": "electron-packager .  Vtro  --out ./ --overwrite --ignore=node_modules",
     "dist": "electron-builder --win ",
-    "predist":"npm run build"
+    "predist": "npm run build"
   },
   "repository": "https://github.com/wk989898/Vtro",
   "keywords": [
@@ -59,7 +58,6 @@
     "css-loader": "^3.5.1",
     "electron": "^8.0.0",
     "electron-builder": "^22.4.1",
-    "electron-packager": "^14.2.1",
     "element-ui": "^2.13.0",
     "file-loader": "^6.0.0",
     "rollup": "^2.6.1",
@@ -74,6 +72,7 @@
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
-    "ping": "^0.2.3"
+    "ping": "^0.2.3",
+    "tcp-ping": "^0.1.1"
   }
 }

@@ -4,16 +4,19 @@ const fs = require('fs')
 const cp = require('child_process')
 const http = require('http')
 const process = require('process')
-var ping = require('ping')
+const ping = require('ping')
+const util = require('util');
+const tcpPing = require('tcp-ping')
+const tcping = util.promisify(tcpPing.ping)
 
 
 var win, tray, trojan, privo, privoxypid, trojanpid
+var pingResult = []
 const server = http.createServer()
 const resourcesPath = path.resolve(process.resourcesPath)
 
 
 function createWindow() {
-  // Create the browser window.
   win = new BrowserWindow({
     width: 800,
     height: 600,
@@ -149,6 +152,26 @@ function deleteData(name, type, condition) {
     })
   })
 }
+// make ping
+async function makePing(e, hosts, cb) {
+  if (pingResult.length !== 0) pingResult = []
+  const start = Date.now()
+  await Promise.all(hosts.map(host => {
+    return cb(host)
+  })).then(res => {
+    res.forEach(v => {
+      let time = parseInt(v.min) || -1
+      pingResult.push(time)
+    })
+  }).catch(e => appendLog(e))
+  console.log(`ping cost:${Date.now() - start}ms\nnum:${pingResult.length}`)
+  e.reply('ping-result', pingResult)
+  addfile('./trojan/lists.json', null, data => {
+    for (let i in data) {
+      data[i]['ping'] = pingResult[i]
+    }
+  })
+}
 /** 监听事件 */
 // 获取当前节点
 ipcMain.once('getnow', (e, r) => {
@@ -258,9 +281,23 @@ ipcMain.on('remove-sub', (e, sub) => {
   e.reply('removed')
 })
 // ping
-ipcMain.on('all-ping', async (e, hosts) => {
-  let arr = []
 
+ipcMain.on('tcping', (e, hosts) => {
+  makePing(e, hosts, host => {
+    return tcping({
+      address: host.ip || host.addr,
+      port: host.port || 443,
+      attempts:3
+    })
+  })
+})
+
+ipcMain.on('all-ping', async (e, hosts) => {
+  makePing(e,hosts,host=>{
+    return ping.promise.probe(host.addr, {
+      timeout: 10
+    })
+  })
   // async function PromiseAll(limit, array, cb) {
   //   if (array.length == 0 || limit <= 0) return;
   //   const list = [].concat(array)
@@ -280,39 +317,16 @@ ipcMain.on('all-ping', async (e, hosts) => {
   //   await Promise.all(Promises)
   // }
 
-  const start = Date.now()
-  await Promise.all(hosts.map(host => {
-    return ping.promise.probe(host.addr, {
-      timeout: 10
-    })
-  })).then(res => {
-    res.forEach((v, i) => {
-      if (v.avg === 'unknown') v.avg = -1
-      arr[i] = parseInt(v.avg)
-    })
-  }).catch(e => {
-    appendLog(e)
-  })
-
   // idx 数组下标 index count计数 
   // await PromiseAll(45, hosts, (host, index, count) => {
   //   return ping.promise.probe(host.addr||host.ip, {
   //     timeout: 5
   //   }).then(res => {
   //     if (res.avg === 'unknown') res.avg = -1
-  //     arr[count] = parseInt(res.avg)||-1
+  //     pingResult[count] = parseInt(res.avg)||-1
   //     return index
   //   })
   // })
-  console.log(arr)
-  console.log(`ping cost:${Date.now() - start}ms\nnum:${arr.length}`)
-
-  e.reply('ping-result', arr)
-  addfile('./trojan/lists.json', null, data => {
-    for (let i in data) {
-      data[i]['ping'] = arr[i]
-    }
-  })
 })
 
 
@@ -325,7 +339,8 @@ var template = [
       { id: 'sub', label: '订阅' },
       { id: 'add', label: '添加节点' },
       { id: 'lists', label: '节点列表' },
-      { id: 'ping', label: 'ping' }
+      { id: 'ping', label: 'ping' },
+      { id: 'tcp-ping', label: 'tcp-ping' }
     ]
   },
   {

@@ -42,6 +42,12 @@
         })
         ipc.send('all-ping', this.lists)
       })
+      ipc.on('tcp-ping',e=>{
+        this.lists.map(list => {
+          list.ping = 'wait'
+        })
+        ipc.send('tcping',this.lists)
+      })
       ipc.on('ping-result', (e, arg) => {
         this.lists.map((list, index) => {
           list.ping = arg[index]
