@@ -4,14 +4,10 @@ const fs = require('fs')
 const cp = require('child_process')
 const http = require('http')
 const process = require('process')
-const ping = require('ping')
 const util = require('util');
-const tcpPing = require('tcp-ping')
-const tcping = util.promisify(tcpPing.ping)
 
 
 var win, tray, trojan, privo, privoxypid, trojanpid
-var pingResult = []
 const server = http.createServer()
 const resourcesPath = path.resolve(process.resourcesPath)
 
@@ -152,26 +148,6 @@ function deleteData(name, type, condition) {
     })
   })
 }
-// make ping
-async function makePing(e, hosts, cb) {
-  if (pingResult.length !== 0) pingResult = []
-  const start = Date.now()
-  await Promise.all(hosts.map(host => {
-    return cb(host)
-  })).then(res => {
-    res.forEach(v => {
-      let time = parseInt(v.min) || -1
-      pingResult.push(time)
-    })
-  }).catch(e => appendLog(e))
-  console.log(`ping cost:${Date.now() - start}ms\nnum:${pingResult.length}`)
-  e.reply('ping-result', pingResult)
-  addfile('./trojan/lists.json', null, data => {
-    for (let i in data) {
-      data[i]['ping'] = pingResult[i]
-    }
-  })
-}
 /** 监听事件 */
 // 获取当前节点
 ipcMain.once('getnow', (e, r) => {
@@ -224,7 +200,7 @@ ipcMain.on('change-linklist', (e, r) => {
       if (err) appendLog(err)
     })
     let data = JSON.parse(res.toString())
-    // password,addr,port,
+    // password,addr,port
     data.remote_addr = r.addr
     data.remote_port = r.port
     data.password[0] = r.password
@@ -250,14 +226,11 @@ ipcMain.on('update', (e, r) => {
 ipcMain.on('get-lists', (e, r) => {
   fs.readFile('./trojan/lists.json', 'utf-8', (err, res) => {
     if (err) {
-      let d = []
-      fs.writeFile('./trojan/lists.json', JSON.stringify(d), () => { })
+      fs.writeFile('./trojan/lists.json', JSON.stringify([]), () => { })
     }
     if (!res) {
-      let log = `please check your lists.json`
-      appendLog(log)
-      return;
-    };
+      return appendLog(`please check your lists.json`)
+    }
     let data = JSON.parse(res.toString())
     e.reply('update-lists', data)
   })
@@ -280,54 +253,7 @@ ipcMain.on('remove-sub', (e, sub) => {
   })
   e.reply('removed')
 })
-// ping
 
-ipcMain.on('tcping', (e, hosts) => {
-  makePing(e, hosts, host => {
-    return tcping({
-      address: host.ip || host.addr,
-      port: host.port || 443,
-      attempts:3
-    })
-  })
-})
-
-ipcMain.on('all-ping', async (e, hosts) => {
-  makePing(e,hosts,host=>{
-    return ping.promise.probe(host.addr, {
-      timeout: 10
-    })
-  })
-  // async function PromiseAll(limit, array, cb) {
-  //   if (array.length == 0 || limit <= 0) return;
-  //   const list = [].concat(array)
-  //   let tem, index, count = limit
-  //   // max limit
-  //   let Promises = list.splice(0, limit).map((v, i) => {
-  //     // cb should be  a promise
-  //     return Promise.resolve(cb(v, i, i))
-  //   })
-
-  //   while (list.length > 0) {
-  //     index = await Promise.race(Promises)
-  //     tem = list.shift()
-  //     count++
-  //     Promises[index] = cb(tem, index, count)
-  //   }
-  //   await Promise.all(Promises)
-  // }
-
-  // idx 数组下标 index count计数 
-  // await PromiseAll(45, hosts, (host, index, count) => {
-  //   return ping.promise.probe(host.addr||host.ip, {
-  //     timeout: 5
-  //   }).then(res => {
-  //     if (res.avg === 'unknown') res.avg = -1
-  //     pingResult[count] = parseInt(res.avg)||-1
-  //     return index
-  //   })
-  // })
-})
 
 
 // 菜单

@@ -49,7 +49,6 @@
           port: form.port,
           name: form.name,
           password: form.password,
-          ping: 0,
           allow: 1
         }
         if (typeof form.addr=='string' && typeof from.port=='number' && form.name && form.password)

@@ -13,22 +13,27 @@
       </el-table-column>
     </el-table>
     <div id="menu" ref="meun">
-      <div class="menu" @click="deletelist">删除</div >
-      <div class="menu"></div >
-      <div  class="menu"></div >
-      <div  class="menu"></div >
-      <div  class="menu"></div >
+      <div class="menu" @click="contextClick('delete',$event)">删除</div>
+      <div class="menu" @click="contextClick('update',$event)">修改</div>
+      <div class="menu" @click="contextClick('ping',$event)">ping</div>
+      <div class="menu" @click="contextClick('tcping',$event)">tcp-ping</div>
     </div>
   </div>
 </template>
 
 <script>
+  import {
+    makeping,
+    maketcping,
+    _ping,
+    _tcping
+  } from '../utils/ping'
   export default {
     data() {
       return {
         lists: null,
-        id: null,
-        tr:null
+        node: null,
+        tr: null
       }
     },
     mounted() {
@@ -37,24 +42,12 @@
         this.lists = this.$global.lists = arg
       })
       ipc.on('ping', e => {
-        this.lists.map(list => {
-          list.ping = 'wait'
-        })
-        ipc.send('all-ping', this.lists)
+        makeping(this.lists)
       })
-      ipc.on('tcp-ping',e=>{
-        this.lists.map(list => {
-          list.ping = 'wait'
-        })
-        ipc.send('tcping',this.lists)
+      ipc.on('tcp-ping', e => {
+        maketcping(this.lists)
       })
-      ipc.on('ping-result', (e, arg) => {
-        this.lists.map((list, index) => {
-          list.ping = arg[index]
-        })
-        this.$forceUpdate()
-      })
-      ipc.on('deleted', (e,arg) => {
+      ipc.on('deleted', (e, arg) => {
         ipc.send('get-lists')
       })
     },
@@ -67,26 +60,47 @@
       this.$forceUpdate()
     },
     methods: {
-      select(e,r,ele) {
-        this.tr&&(this.tr.style.backgroundColor='')
+      select(e, r, ele) {
+        this.tr && (this.tr.style.backgroundColor = '')
         let ipc = electron.ipcRenderer
         ipc.send('change-linklist', e)
         ipc.send('close')
         this.$emit('makenow', e.name)
-        this.tr=ele.target.parentElement.parentElement
-        this.tr.style.backgroundColor='#409EFF'
+        this.tr = ele.target.parentElement.parentElement
+        this.tr.style.backgroundColor = '#409EFF'
       },
       contextmenu(r, d, e) {
         let meun = this.$refs.meun
-        this.id = r.ip
+        // node为选中节点
+        this.node = r
+        let length = menu.children.length
         menu.style.left = e.clientX + 'px'
         menu.style.top = e.clientY + 'px'
-        menu.style.height = '125px'
+        menu.style.height = `${30*length}px`
       },
-      deletelist(e) {
+      contextClick(type, e) {
         e.stopPropagation()
         let ipc = electron.ipcRenderer
-        ipc.send('delete-list', this.id)
+        let host = this.node,
+          self = this,
+          result
+        if (type === 'delete') {
+          ipc.send('delete-list', host.ip)
+        } else if (type === 'update') {} else if (type === 'tcping') {
+          _tcping(host, res => {
+            let result = parseInt(res.avg) || parseInt(res.min) || -1
+            self.lists.forEach((v, i) => {
+              if (v === host) v.ping = result
+            })
+          })
+        } else if (type === 'ping') {
+          _tcping(host, res => {
+            let result = parseInt(res.avg) || parseInt(res.min) || -1
+            self.lists.forEach((v, i) => {
+              if (v === host) v.ping = result
+            })
+          })
+        }
         this.$refs.meun.style.height = '0'
       }
     }
@@ -102,21 +116,20 @@
     height: 0;
     width: 130px;
     overflow: hidden;
-    box-shadow: 0 1px 1px #888, 1px 0 1px #ccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
     position: absolute;
-    background: #eee;
+    background: #fff;
     z-index: 9999;
+    cursor: default;
   }
   #menu .menu {
     width: 110px;
-    height: 25px;
-    border-bottom: 1px solid #aaa;
-    line-height: 25px;
+    height: 30px;
+    border-bottom: 1px solid #ccc;
+    line-height: 30px;
     padding: 0 10px;
   }
   #menu .menu:hover {
     background: #ccc;
-  }
-  .select{
   }
 </style>
