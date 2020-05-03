@@ -1,6 +1,6 @@
 <template>
-  <div class="lists">
-    <el-table :data="lists" border style="width: 100%" highlight-current-row @row-dblclick="select" @row-contextmenu="contextmenu">
+  <div class="nodes">
+    <el-table :data="nodes" border style="width: 100%" highlight-current-row @row-dblclick="select" @row-contextmenu="contextmenu">
       <el-table-column prop="ip" label="ip" width="180">
       </el-table-column>
       <el-table-column prop="name" label="名称" width="180">
@@ -31,43 +31,38 @@
   export default {
     data() {
       return {
-        lists: null,
+        nodes: null,
         node: null,
         tr: null
       }
     },
     mounted() {
       let ipc = electron.ipcRenderer
-      ipc.on('update-lists', (e, arg) => {
-        this.lists = this.$global.lists = arg
-      })
-      ipc.on('ping', e => {
-        makeping(this.lists)
-      })
-      ipc.on('tcp-ping', e => {
-        maketcping(this.lists)
-      })
-      ipc.on('deleted', (e, arg) => {
-        ipc.send('get-lists')
+      ipc.on('update-nodes', (e, arg) => {
+        this.nodes = this.$global.nodes = arg
+      }).on('ping', e => {
+        makeping(this.nodes)
+      }).on('tcp-ping', e => {
+        maketcping(this.nodes)
+      }).on('deleted', (e, arg) => {
+        ipc.send('get-nodes')
       })
     },
     activated() {
-      if ((!this.lists) || (!this.$global.lists[0])) {
+      if ((!this.nodes) || (!this.$global.nodes[0])) {
         let ipc = electron.ipcRenderer
-        ipc.send('get-lists')
+        ipc.send('get-nodes')
       } else
-        this.lists = this.$global.lists
+        this.nodes = this.$global.nodes
       this.$forceUpdate()
     },
     methods: {
       select(e, r, ele) {
         this.tr && (this.tr.style.backgroundColor = '')
         let ipc = electron.ipcRenderer
-        ipc.send('change-linklist', e)
+        ipc.send('change-linknode', e)
         ipc.send('close')
         this.$emit('makenow', e.name)
-        this.tr = ele.target.parentElement.parentElement
-        this.tr.style.backgroundColor = '#409EFF'
       },
       contextmenu(r, d, e) {
         let meun = this.$refs.meun
@@ -85,18 +80,18 @@
           self = this,
           result
         if (type === 'delete') {
-          ipc.send('delete-list', host.ip)
+          ipc.send('delete-node', host.ip)
         } else if (type === 'update') {} else if (type === 'tcping') {
           _tcping(host, res => {
             let result = parseInt(res.avg) || parseInt(res.min) || -1
-            self.lists.forEach((v, i) => {
+            self.nodes.forEach((v, i) => {
               if (v === host) v.ping = result
             })
           })
         } else if (type === 'ping') {
           _tcping(host, res => {
             let result = parseInt(res.avg) || parseInt(res.min) || -1
-            self.lists.forEach((v, i) => {
+            self.nodes.forEach((v, i) => {
               if (v === host) v.ping = result
             })
           })
@@ -107,7 +102,7 @@
   }
 </script>
 <style>
-  .lists {
+  .nodes {
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
     margin: 10px;
     margin-right: 20px;

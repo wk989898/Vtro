@@ -27,28 +27,35 @@
     },
     mounted() {
       let ipc = electron.ipcRenderer
-      ipc.on('sub', (e, arg) => {
+      ipc.on('subs', (e, arg) => {
         this.subs = arg
       })
       ipc.on('removed', (e, arg) => {
-          ipc.send('get-sub')
+        ipc.send('get-sub')
       })
     },
     methods: {
-      update() {
+      async update() {
         let ipc = electron.ipcRenderer
-        this.$axios.get(this.sub).then(res => {
-          let data = this.$global.lists = Trojan.subscribe(res.data)
-          ipc.send('update', {
-            data,
-            sub: this.sub
+        this.sub && this.subs.push(this.sub)
+        let nodes = [],
+          i = 0,
+          j = this.subs.length
+        for (; i < j; i++)
+          await this.$axios.get(this.subs[i]).then(res => {
+            nodes.push(Trojan.subscribe(res.data))
+          }).catch(e => {
+            console.log(e)
+            if (!this.confirm) this.confirm = true
           })
-          this.confirm = false
-          this.$router.push('/')
-        }).catch(e => {
-          console.log(e)
-          this.confirm = true
+        nodes=this.$global.nodes = nodes.flat(Infinity)
+        
+        ipc.send('update', {
+          nodes,
+          sub: this.sub
         })
+        this.confirm = false
+        this.$router.push('/')
       },
       remove(i) {
         let ipc = electron.ipcRenderer
@@ -70,7 +77,7 @@
     border-bottom: 0;
     background-color: #ccc;
   }
-  .subs button{
+  .subs button {
     margin-left: 80px;
   }
 </style>

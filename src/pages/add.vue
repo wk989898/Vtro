@@ -49,20 +49,21 @@
           port: form.port,
           name: form.name,
           password: form.password,
-          allow: 1
+          allow: 1,
+          ping:0
         }
         if (typeof form.addr=='string' && typeof from.port=='number' && form.name && form.password)
-          this.addlist(data)
+          this.addnode(data)
           else this.$message('请输入正确的格式!')
       },
       addtro() {
         let data = Trojan.toTrojan(this.tro)
-        this.addlist(data)
+        this.addnode(data)
       },
-      addlist(data) {
+      addnode(data) {
         let ipc = electron.ipcRenderer
-        this.$global.lists && this.$global.lists.unshift(data)
-        ipc.send('add-list', {
+        this.$global.nodes && this.$global.nodes.unshift(data)
+        ipc.send('add-node', {
           data
         })
         this.$router.push('/')

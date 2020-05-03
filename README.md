@@ -12,7 +12,7 @@ trojan 的 windows 图形界面
 
 ## 运行
 
-```
+``` cmd
 npm run dist
 cd dist
 ```

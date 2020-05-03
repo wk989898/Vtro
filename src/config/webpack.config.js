@@ -1,5 +1,14 @@
 const path = require('path')
+const TerserPlugin = require('terser-webpack-plugin')
 const { VueLoaderPlugin } = require("vue-loader")
+
+const banner=
+`/**
+*   Vtro
+*   a trojan client for windows
+*   by wk989898
+*   repository https://github.com/wk989898/Vtro
+*/`
 
 module.exports = {
   mode: 'production',
@@ -13,6 +22,21 @@ module.exports = {
       '@': './src'
     },
     extensions: ['.js', '.json', '.vue', '.css']
+  },
+  optimization: {
+    sideEffects: false,
+    minimizer: [
+      new TerserPlugin({
+        sourceMap: true,
+        extractComments: false,
+        terserOptions: {
+          output: {
+            comments: false,
+            preamble:banner
+          }
+        }
+      })
+    ]
   },
   module: {
     rules: [
@@ -33,11 +57,12 @@ module.exports = {
   plugins: [
     new VueLoaderPlugin(),
   ],
+
   externals: {
     electron: 'electron'
   },
-  devtool:'source-map',
-  watchOptions:{
-    ignored:/node_modules/
+  devtool: 'source-map',
+  watchOptions: {
+    ignored: /node_modules/
   }
 }

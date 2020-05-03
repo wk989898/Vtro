@@ -41,9 +41,9 @@
         sub: '订阅',
         add: '添加节点',
         set: '设置',
-        lists: '节点列表'
+        nodes: '节点列表'
       }
-      let route = ['sub',  'add', 'set', 'lists']
+      let route = ['sub',  'add', 'set', 'nodes']
       route.forEach(v => {
         ipc.on(v, (e, arg) => {
             this.$router.push(`/${v}`)

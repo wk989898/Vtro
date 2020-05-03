@@ -71,6 +71,11 @@ app.on('activate', function () {
   if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
+
+// 获取类型
+function type(a) {
+  return Object.prototype.toString.call(a).slice(8).replace(']', '').toLowerCase()
+}
 // 添加日志
 function appendLog(err, path) {
   if (path === null || path === undefined) path = './trojan/log.txt'
@@ -114,64 +119,86 @@ function allquit() {
   server.listening && server.close()
 }
 // 添加文件
-function addfile(name, chunk, cb) {
-  fs.readFile(name, 'utf-8', (err, res) => {
-    if (err) appendLog(err)
-    let data
-    if (!res) data = []
-    data = JSON.parse(res.toString()) || []
-    if (cb) cb(data)
-    else if (chunk) {
-      try {
-        data.unshift(chunk)
-      } catch{
-        data = []
-        data.unshift(chunk)
-      }
-    } else appendLog(`no chunk or callback paramater in addfile func`)
-    fs.writeFile(name, JSON.stringify(data), e => { e && appendLog(e) })
+async function addfile(name, chunk, cb) {
+  if (!chunk) return appendLog(`there is no chunk`)
+  await openConf('a', null, res => {
+    cb && cb(res)
+    if (type(chunk) === 'array')
+      return res[name].unshift(...chunk)
+    res[name].unshift(chunk)
   })
 }
 // 删除数据
-function deleteData(name, type, condition) {
-  fs.readFile(name, 'utf-8', (err, res) => {
-    if (err) appendLog(err)
-    if (!res) return;
-    let data = JSON.parse(res.toString())
-    data = data.filter(v => {
-      // return v.ip !== ip
-      // return v===r
-      return condition(v)
-    })
-    fs.writeFile(name, JSON.stringify(data), 'utf-8', err => {
-      if (err) appendLog(err)
-    })
+function deleteData(name, condition) {
+  openConf('a', null, res => {
+    if (type(res[name]) === 'array') {
+      res[name] = res[name].filter(v => {
+        return condition(v)
+      })
+    }
   })
 }
+/**
+ * @param {string} type
+ * 'r' - 打开文件用于读取
+ * 'w' - 打开文件用于写入
+ * 'a' - 打开文件用于追加
+ * @param {any} data 
+ * 写入数据  default :''
+ * @callback cb
+ * @param {object} res
+ * 
+ */
+function openConf(type, data = '', cb) {
+  let file = 'trojan/conf.json'
+  if (type === 'r') {
+    return fs.readFile(file, 'utf-8', (err, res) => {
+      if (err) appendLog(err)
+      res = JSON.parse(res.toString())
+      cb(res)
+    })
+  } else if (type === 'w') {
+    return fs.writeFile(file, JSON.stringify(data), err => {
+      if (err) appendLog(err)
+    })
+  } else if (type === 'a') {
+    return fs.readFile(file, 'utf-8', async (err, res) => {
+      if (err) appendLog(err)
+      data = JSON.parse(res.toString())
+      await cb(data)
+      fs.writeFile(file, JSON.stringify(data), err => {
+        if (err) appendLog(err)
+      })
+    })
+  }
+}
 /** 监听事件 */
-// 获取当前节点
+// 获取当前节点 获取节点
 ipcMain.once('getnow', (e, r) => {
-  fs.readFile('./trojan/now.json', 'utf-8', (err, res) => {
-    if (err) appendLog(err)
-    if (!res) return e.reply('setnow', '')
-    let name = JSON.parse(res).name
+  openConf('r', null, res => {
+    let name = res.now.name
     e.reply('setnow', name ? name : '')
   })
+}).on('get-nodes', (e, r) => {
+  openConf('r', null, res => {
+    if (!res.nodes) return appendLog(`please check your conf.json`)
+    e.reply('update-nodes', res.nodes)
+  })
 })
-// 连接
+// 连接 关闭
 ipcMain.on('link', (e, type) => {
   allquit()
   trojan = cp.execFile('trojan.exe', {
     cwd: './trojan',
     windowsHide: true
   }, (err, stdout, stderr) => {
-    if (err) appendLog(stderr, './trojan/trojanlog.txt')
-    if (stderr) appendLog(stderr, './trojan/trojanlog.txt')
-    e.reply('closed', { err: err ? err : stderr ? stderr : null })
+    if (err) appendLog(stderr, './trojan/trojan-log.txt')
+    if (stdout) appendLog(stdout, './trojan/trojan-log.txt')
+    e.reply('closed', { err: err ? err : null })
     return console.log('link is closed')
   })
   trojanpid = trojan.pid
-  let arg = ''
+  let arg
   if (type === 'global') {
     arg = `http://127.0.0.1:1081`
     let list = `localhost;127.*`
@@ -186,18 +213,17 @@ ipcMain.on('link', (e, type) => {
     })
   } else makeproxy('set', 1)
   e.reply('linked')
-})
-// 关闭
-ipcMain.on('close', (e, r) => {
+}).on('close', (e, r) => {
   allquit()
 })
+
 // 更改连接节点
-ipcMain.on('change-linklist', (e, r) => {
+ipcMain.on('change-linknode', (e, r) => {
   if (!r) return;
   fs.readFile('./trojan/config.json', 'utf-8', (err, res) => {
     if (err) appendLog(err)
-    fs.writeFile('./trojan/now.json', JSON.stringify(r), 'utf-8', err => {
-      if (err) appendLog(err)
+    openConf('a', null, res => {
+      res.now = r
     })
     let data = JSON.parse(res.toString())
     // password,addr,port
@@ -209,51 +235,32 @@ ipcMain.on('change-linklist', (e, r) => {
     })
   })
 })
-// 获取订阅
+// 获取订阅 更新订阅 删除订阅
 ipcMain.on('get-sub', e => {
-  fs.readFile('./trojan/sub.json', (err, r) => {
-    if (err) return appendLog(err)
-    let data = JSON.parse(r.toString()) || []
-    r && e.reply('sub', data)
+  openConf('r', null, res => {
+    e.reply('subs', res.sub || [])
   })
-})
-// 更新节点
-ipcMain.on('update', (e, r) => {
-  addfile('./trojan/sub.json', r.sub)
-  addfile('./trojan/lists.json', r.data)
-})
-// 获取节点
-ipcMain.on('get-lists', (e, r) => {
-  fs.readFile('./trojan/lists.json', 'utf-8', (err, res) => {
-    if (err) {
-      fs.writeFile('./trojan/lists.json', JSON.stringify([]), () => { })
-    }
-    if (!res) {
-      return appendLog(`please check your lists.json`)
-    }
-    let data = JSON.parse(res.toString())
-    e.reply('update-lists', data)
+}).on('update', (e, r) => {
+  addfile('nodes', r.nodes, res => {
+    res.nodes = []
   })
-})
-// 手动添加节点
-ipcMain.on('add-list', (e, r) => {
-  addfile('./trojan/lists.json', r.data)
-})
-// 删除节点
-ipcMain.on('delete-list', (e, ip) => {
-  deleteData('./trojan/lists.json', 'list', v => {
-    return v.ip !== ip
-  })
-  e.reply('deleted')
-})
-// 删除订阅
-ipcMain.on('remove-sub', (e, sub) => {
-  deleteData('./trojan/sub.json', 'sub', v => {
+  addfile('sub', r.sub)
+}).on('remove-sub', (e, sub) => {
+  deleteData('sub', v => {
     return v !== sub
   })
   e.reply('removed')
 })
 
+// 手动添加节点 删除节点
+ipcMain.on('add-node', (e, r) => {
+  addfile('nodes', r.data)
+}).on('delete-node', (e, ip) => {
+  deleteData('nodes', v => {
+    return v.ip !== ip
+  })
+  e.reply('deleted')
+})
 
 
 // 菜单
@@ -264,7 +271,7 @@ var template = [
     submenu: [
       { id: 'sub', label: '订阅' },
       { id: 'add', label: '添加节点' },
-      { id: 'lists', label: '节点列表' },
+      { id: 'nodes', label: '节点列表' },
       { id: 'ping', label: 'ping' },
       { id: 'tcp-ping', label: 'tcp-ping' }
     ]
