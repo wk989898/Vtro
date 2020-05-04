@@ -4,7 +4,6 @@ const fs = require('fs')
 const cp = require('child_process')
 const http = require('http')
 const process = require('process')
-const util = require('util');
 
 
 var win, tray, trojan, privo, privoxypid, trojanpid
@@ -174,12 +173,7 @@ function openConf(type, data = '', cb) {
 }
 /** 监听事件 */
 // 获取当前节点 获取节点
-ipcMain.once('getnow', (e, r) => {
-  openConf('r', null, res => {
-    let name = res.now.name
-    e.reply('setnow', name ? name : '')
-  })
-}).on('get-nodes', (e, r) => {
+ipcMain.on('get-nodes', e => {
   openConf('r', null, res => {
     if (!res.nodes) return appendLog(`please check your conf.json`)
     e.reply('update-nodes', res.nodes)
@@ -199,6 +193,10 @@ ipcMain.on('link', (e, type) => {
   })
   trojanpid = trojan.pid
   let arg
+  if (!type)
+    openConf('r', null, res => {
+      type = res.config.proxy
+    })
   if (type === 'global') {
     arg = `http://127.0.0.1:1081`
     let list = `localhost;127.*`
@@ -218,18 +216,21 @@ ipcMain.on('link', (e, type) => {
 })
 
 // 更改连接节点
-ipcMain.on('change-linknode', (e, r) => {
-  if (!r) return;
+ipcMain.on('change-linknode', (e, now) => {
   fs.readFile('./trojan/config.json', 'utf-8', (err, res) => {
     if (err) appendLog(err)
     openConf('a', null, res => {
-      res.now = r
+      if (now === 'night') now = res.config.night
+      else if (type(now) === 'object') {
+        res.config.now = now
+        e.reply('config', res.config)
+      } else now = res.config.now
     })
     let data = JSON.parse(res.toString())
     // password,addr,port
-    data.remote_addr = r.addr
-    data.remote_port = r.port
-    data.password[0] = r.password
+    data.remote_addr = now.addr
+    data.remote_port = now.port
+    data.password[0] = now.password
     fs.writeFile('./trojan/config.json', JSON.stringify(data), 'utf-8', err => {
       if (err) appendLog(err)
     })
@@ -262,6 +263,21 @@ ipcMain.on('add-node', (e, r) => {
   e.reply('deleted')
 })
 
+// config 设置     夜间节点
+ipcMain.on('getConf', e => {
+  openConf('r', null, res => {
+    e.reply('config', res.config)
+  })
+}).on('setConf', (e, conf) => {
+  openConf('a', null, res => {
+    Object.assign(res.config, conf)
+  })
+}).on('make-nightNode', (e, node) => {
+  openConf('a', null, res => {
+    res.config.night = node
+  })
+})
+
 
 // 菜单
 var template = [
@@ -288,7 +304,7 @@ var template = [
         id: 'trojanlog', label: 'trojan日志',
         click: () => {
           try {
-            shell.openItem(path.resolve('trojan/trojanlog.txt'))
+            shell.openItem(path.resolve('trojan/trojan-log.txt'))
           } catch (e) {
           }
         }

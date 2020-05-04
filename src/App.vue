@@ -6,7 +6,7 @@
       </el-collapse-item>
       <el-collapse-item :title="type" name="2">
         <keep-alive>
-          <router-view @changeproxy="changeproxy" @makenow="changenow"/>
+          <router-view />
         </keep-alive>
       </el-collapse-item>
     </el-collapse>
@@ -22,9 +22,7 @@
     data() {
       return {
         activeNames: ['1', '2'],
-        type: '节点列表',
-        mode: 'pac',
-        now:''
+        type: '节点列表'
       }
     },
     components: {
@@ -35,7 +33,6 @@
       this.$router.push(`/`)
     },
     mounted() {
-      window.ipc = electron.ipcRenderer
       let ipc = electron.ipcRenderer
       let o = {
         sub: '订阅',
@@ -50,14 +47,6 @@
             this.type = o[v]
         })
       })
-    },
-    methods: {
-      changeproxy(e) {
-        this.mode = e
-      },
-      changenow(e){
-        this.now=e
-      }
     }
   }
 </script>

@@ -12,11 +12,13 @@
       <el-table-column prop="ping" label="ping(ms)">
       </el-table-column>
     </el-table>
+    
     <div id="menu" ref="meun">
       <div class="menu" @click="contextClick('delete',$event)">删除</div>
       <div class="menu" @click="contextClick('update',$event)">修改</div>
       <div class="menu" @click="contextClick('ping',$event)">ping</div>
       <div class="menu" @click="contextClick('tcping',$event)">tcp-ping</div>
+      <div class="menu" @click="contextClick('night',$event)">设置为夜晚节点</div>
     </div>
   </div>
 </template>
@@ -62,7 +64,6 @@
         let ipc = electron.ipcRenderer
         ipc.send('change-linknode', e)
         ipc.send('close')
-        this.$emit('makenow', e.name)
       },
       contextmenu(r, d, e) {
         let meun = this.$refs.meun
@@ -95,9 +96,11 @@
               if (v === host) v.ping = result
             })
           })
+        }else if(type === 'night'){
+          ipc.send('make-nightNode', host)
         }
         this.$refs.meun.style.height = '0'
-      }
+      },
     }
   }
 </script>

@@ -12,7 +12,7 @@ trojan 的 windows 图形界面
 
 ## 运行
 
-``` cmd
+```cmd
 npm run dist
 cd dist
 ```
@@ -20,6 +20,12 @@ cd dist
 ## 下载
 
 [点击这里](https://github.com/wk989898/Vtro/releases/)&nbsp;&nbsp;&nbsp;![Vtro](./tray.ico)
+
+## Todo
+
+- 更改节点
+- 根据时间改变节点
+- 分享节点
 
 ## Credits
 
