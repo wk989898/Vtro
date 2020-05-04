@@ -70,8 +70,8 @@
         // node为选中节点
         this.node = r
         let length = menu.children.length
-        menu.style.left = e.clientX + 'px'
-        menu.style.top = e.clientY + 'px'
+        menu.style.left = e.pageX + 'px'
+        menu.style.top = e.pageY + 'px'
         menu.style.height = `${30*length}px`
       },
       contextClick(type, e) {
