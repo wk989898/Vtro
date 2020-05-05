@@ -37,12 +37,12 @@
     methods: {
       async update() {
         let ipc = electron.ipcRenderer
-        this.sub && this.subs.push(this.sub)
+        const list=Array.from(new Set(this.subs).add(this.sub))
         let nodes = [],
           i = 0,
-          j = this.subs.length
+          j = list.length
         for (; i < j; i++)
-          await this.$axios.get(this.subs[i]).then(res => {
+          await this.$axios.get(list[i]).then(res => {
             nodes.push(Trojan.subscribe(res.data))
           }).catch(e => {
             console.log(e)
@@ -52,7 +52,7 @@
         
         ipc.send('update', {
           nodes,
-          sub: this.sub
+          sub: list
         })
         this.confirm = false
         this.$router.push('/')
@@ -76,6 +76,7 @@
     border: 1px solid #eee;
     border-bottom: 0;
     background-color: #ccc;
+    cursor: default;
   }
   .subs button {
     margin-left: 80px;

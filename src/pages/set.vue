@@ -27,6 +27,9 @@
   import {
     calcTime
   } from '../utils/time'
+  import {
+    clearTimeout
+  } from 'timers';
   export default {
     data() {
       return {
@@ -35,7 +38,9 @@
         proxy: null,
         startTime: null,
         endTime: null,
-        night: null
+        night: null,
+        pid1: null,
+        pid2: null
       }
     },
     mounted() {
@@ -57,6 +62,9 @@
         this.night = night
       }).on('login', (e, login) => {
         this.login = login
+      }).on('mode', () => {
+        ipc.send('getConf')
+        this.$global.link && ipc.send('link')
       })
     },
     watch: {
@@ -66,23 +74,25 @@
         ipc.send('setConf', {
           proxy: newval
         })
-        ipc.send('close')
+        if (this.$global.link) setTimeout(() => {
+          ipc.send('link')
+        }, 1000)
       },
     },
     methods: {
       changeLogin(e) {
         let ipc = electron.ipcRenderer
         ipc.send('set-login', e)
-        console.log(e)
-      },
-      // 延迟
-      relink() {
-        let ipc = electron.ipcRenderer
-        setTimeout(() => {
-          ipc.send('link')
-        }, 1000)
       },
       selectNode() {
+        if (this.$global.pid1) {
+          window.clearTimeout(this.$global.pid1)
+          this.$global.pid1 = null
+        }
+        if (this.$global.pid2) {
+          window.clearTimeout(this.$global.pid2)
+          this.$global.pid2 = null
+        }
         const time = {
           startTime: this.startTime,
           endTime: this.endTime
@@ -94,19 +104,27 @@
         if (!this.night) {
           return this.$message('请确认是否有夜间节点~')
         }
+        const tem = this.opneNight(time)
+        tem && this.$message('更改成功')
+      },
+      opneNight(time) {
+        if (this.$global.pid1 || this.$global.pid2) return false;
+        let ipc = electron.ipcRenderer
         const [isOpen, t, bt = 0] = calcTime(time)
-        if (t === 0) return;
-        setTimeout(() => {
-          // 更换夜间节点
-          ipc.send('change-linknode', 'night')
-          this.relink()
+        console.log(isOpen,t,bt)
+        if (t === 0) {
+          this.$message('设置夜间节点无效')
+          return false
+        }
+        this.$global.pid1 = setTimeout(() => {
+          // 进入夜间节点
+          ipc.send('change-mode', 'night')
           // 退出夜间节点
-          setTimeout(() => {
-            ipc.send('change-linknode')
-            this.relink()
+          this.$global.pid2 = setTimeout(() => {
+            ipc.send('change-mode', 'day')
           }, t)
         }, bt)
-        this.$message('更改成功')
+        return true
       }
     }
   }

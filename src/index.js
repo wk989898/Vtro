@@ -10,7 +10,8 @@ Vue.use(ElementUI)
 Vue.prototype.$axios = Axios
 Vue.prototype.$global = {
   nodes: [],
-  now:null
+  now:null,
+  link:false
 }
 new Vue({
   router,

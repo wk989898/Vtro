@@ -10,7 +10,6 @@ var win, tray, trojan, privo, privoxypid, trojanpid
 const server = http.createServer()
 const resourcesPath = path.resolve(process.resourcesPath)
 
-
 function createWindow() {
   win = new BrowserWindow({
     width: 800,
@@ -75,16 +74,19 @@ app.on('activate', function () {
 function type(a) {
   return Object.prototype.toString.call(a).slice(8).replace(']', '').toLowerCase()
 }
+function _path(p) {
+  return path.resolve(p)
+}
 // 添加日志
 function appendLog(err, path) {
-  if (path === null || path === undefined) path = './trojan/log.txt'
+  if (path === null || path === undefined) path = _path('./trojan/log.txt')
   fs.appendFile(path, err + '\n', 'utf-8', () => { })
 }
 // 设置pac代理
 server.on('request', (req, res) => {
   if (req.url === '/pac') {
     res.setHeader('Content-Type', 'application/x-ns-proxy-autoconfig')
-    fs.readFile('./proxy/proxy.pac', (e, data) => {
+    fs.readFile(_path('./proxy/proxy.pac'), (e, data) => {
       if (e) res.end('error')
       res.end(data)
     })
@@ -144,7 +146,7 @@ function deleteData(name, condition) {
  * @param {object} res
  */
 async function openConf(type, data = '', cb) {
-  let file = './trojan/conf.json'
+  let file = _path('./trojan/conf.json')
   if (type === 'r') {
     return await fs.readFile(file, 'utf-8', (err, res) => {
       if (err) appendLog(err)
@@ -168,16 +170,18 @@ async function openConf(type, data = '', cb) {
 }
 // 更改 config.json
 function changeConfig() {
-  fs.readFile('./trojan/config.json', 'utf-8', (err, res) => {
+  fs.readFile(_path('./trojan/config.json'), 'utf-8', (err, res) => {
     if (err) appendLog(err)
     let data = JSON.parse(res.toString())
     openConf('r', null, res => {
-      const now = res.config.mode === 'night' ? res.config.night : res.config.day
+      let now
+      if (!res.config.night)  now = res.config.day
+      else now = res.config.mode === 'night' ? res.config.night : res.config.day
       // password,addr,port
       data.remote_addr = now.addr
       data.remote_port = now.port
       data.password[0] = now.password
-      fs.writeFile('./trojan/config.json', JSON.stringify(data), 'utf-8', err => {
+      fs.writeFile(_path('./trojan/config.json'), JSON.stringify(data), 'utf-8', err => {
         if (err) appendLog(err)
       })
     })
@@ -200,8 +204,8 @@ ipcMain.on('link', (e, type) => {
     cwd: './trojan',
     windowsHide: true
   }, (err, stdout, stderr) => {
-    if (err) appendLog(stderr, './trojan/trojan-log.txt')
-    if (stdout) appendLog(stdout, './trojan/trojan-log.txt')
+    if (err) appendLog(stderr, _path('./trojan/trojan-log.txt'))
+    if (stdout) appendLog(stdout, _path('./trojan/trojan-log.txt'))
   })
   trojanpid = trojan.pid
   let arg
@@ -229,7 +233,7 @@ ipcMain.on('link', (e, type) => {
   console.log('link is closed')
 })
 
-// 更改连接节点 夜间节点
+// 更改连接节点 夜间节点 mode
 ipcMain.on('change-linkNode', (e, node) => {
   if (!node) return;
   openConf('a', null, res => {
@@ -242,6 +246,11 @@ ipcMain.on('change-linkNode', (e, node) => {
     res.config.night = node
     e.reply('config', res.config)
   })
+}).on('change-mode', (e, mode) => {
+  openConf('a', null, res => {
+    res.config.mode = mode
+    e.reply('mode')
+  })
 })
 // 获取订阅 更新订阅 删除订阅
 ipcMain.on('get-sub', e => {
@@ -249,13 +258,18 @@ ipcMain.on('get-sub', e => {
     e.reply('subs', res.sub || [])
   })
 }).on('update', (e, r) => {
-  addfile('nodes', r.nodes, res => {
-    res.nodes.length = 0
+  Promise.resolve(
+    addfile('nodes', r.nodes, res => {
+      res.nodes.length = 0
+    })
+  ).then(e => {
+    // 防止写入数据出错
+    setTimeout(() => {
+      addfile('sub', r.sub, res => {
+        res.sub.length = 0
+      })
+    }, 3000)
   })
-  // 防止写入数据出错
-  setTimeout(() => {
-    addfile('sub', r.sub)
-  }, 1000)
 }).on('remove-sub', (e, sub) => {
   deleteData('sub', v => {
     return v !== sub
@@ -296,7 +310,7 @@ ipcMain.on('set-login', (e, login) => {
   } else {
     app.setLoginItemSettings({
       openAsHidden: true,
-      openAtLogin: login
+      openAtLogin: login,
     })
   }
 }).on('get-login', e => {
