@@ -109,6 +109,7 @@
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
     margin: 10px;
     margin-right: 20px;
+    cursor: default;
   }
   #menu {
     height: 0;

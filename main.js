@@ -122,9 +122,9 @@ async function addfile(name, chunk, cb) {
   if (!chunk) return appendLog(`there is no chunk`)
   await openConf('a', null, res => {
     cb && cb(res)
-    if (type(chunk) === 'array')
-      return res[name].unshift(...chunk)
-    res[name].unshift(chunk)
+    if (type(chunk) === 'array') {
+      res[name].unshift(...chunk)
+    } else { res[name].unshift(chunk) }
   })
 }
 // 删除数据
@@ -143,24 +143,24 @@ function deleteData(name, condition) {
  * @callback cb
  * @param {object} res
  */
-function openConf(type, data = '', cb) {
-  let file = 'trojan/conf.json'
+async function openConf(type, data = '', cb) {
+  let file = './trojan/conf.json'
   if (type === 'r') {
-    return fs.readFile(file, 'utf-8', (err, res) => {
+    return await fs.readFile(file, 'utf-8', (err, res) => {
       if (err) appendLog(err)
       res = JSON.parse(res.toString())
       cb(res)
     })
   } else if (type === 'w') {
-    return fs.writeFile(file, JSON.stringify(data), err => {
+    return await fs.writeFile(file, JSON.stringify(data), err => {
       if (err) appendLog(err)
     })
   } else if (type === 'a') {
-    return fs.readFile(file, 'utf-8', async (err, res) => {
+    return await fs.readFile(file, 'utf-8', async (err, res) => {
       if (err) appendLog(err)
-      data = JSON.parse(res.toString())
-      await cb(data)
-      fs.writeFile(file, JSON.stringify(data), err => {
+      res = JSON.parse(res.toString())
+      await cb(res)
+      fs.writeFile(file, JSON.stringify(res), err => {
         if (err) appendLog(err)
       })
     })
@@ -171,19 +171,15 @@ function changeConfig() {
   fs.readFile('./trojan/config.json', 'utf-8', (err, res) => {
     if (err) appendLog(err)
     let data = JSON.parse(res.toString())
-    let now
     openConf('r', null, res => {
-      const mode = res.config.mode
-      if (mode === 'night') {
-        now = res.config.night
-      } else now = res.config.day
-    })
-    // password,addr,port
-    data.remote_addr = now.addr
-    data.remote_port = now.port
-    data.password[0] = now.password
-    fs.writeFile('./trojan/config.json', JSON.stringify(data), 'utf-8', err => {
-      if (err) appendLog(err)
+      const now = res.config.mode === 'night' ? res.config.night : res.config.day
+      // password,addr,port
+      data.remote_addr = now.addr
+      data.remote_port = now.port
+      data.password[0] = now.password
+      fs.writeFile('./trojan/config.json', JSON.stringify(data), 'utf-8', err => {
+        if (err) appendLog(err)
+      })
     })
   })
 }
@@ -206,31 +202,31 @@ ipcMain.on('link', (e, type) => {
   }, (err, stdout, stderr) => {
     if (err) appendLog(stderr, './trojan/trojan-log.txt')
     if (stdout) appendLog(stdout, './trojan/trojan-log.txt')
-    e.reply('closed', { err: err ? err : null })
-    return console.log('link is closed')
   })
   trojanpid = trojan.pid
   let arg
-  if (!type)
-    openConf('r', null, res => {
-      type = res.config.proxy || 'pac'
-    })
-  if (type === 'global') {
-    arg = `http://127.0.0.1:1081`
-    let list = `localhost;127.*`
-    makeproxy(type, arg, list)
-    privoxy()
-  } else if (type === 'pac') {
-    // 默认
-    arg = `http://127.0.0.1:1082/pac`
-    !server.listening && server.listen(1082, '127.0.0.1', () => {
-      makeproxy(type, arg)
+  openConf('r', null, res => {
+    type = type ? type : (res.config.proxy || 'pac')
+    if (type === 'global') {
+      arg = `http://127.0.0.1:1081`
+      let list = `localhost;127.*`
+      makeproxy(type, arg, list)
       privoxy()
-    })
-  } else makeproxy('set', 1)
+    } else if (type === 'pac') {
+      // 默认
+      arg = `http://127.0.0.1:1082/pac`
+      !server.listening && server.listen(1082, '127.0.0.1', () => {
+        makeproxy(type, arg)
+        privoxy()
+      })
+    } else makeproxy('set', 1)
+  })
   e.reply('linked')
+  console.log('link is open')
 }).on('close', (e, r) => {
   allquit()
+  e.reply('closed')
+  console.log('link is closed')
 })
 
 // 更改连接节点 夜间节点
@@ -238,11 +234,13 @@ ipcMain.on('change-linkNode', (e, node) => {
   if (!node) return;
   openConf('a', null, res => {
     res.config.day = node
+    e.reply('config', res.config)
   })
 }).on('change-nightNode', (e, node) => {
   if (!node) return;
   openConf('a', null, res => {
     res.config.night = node
+    e.reply('config', res.config)
   })
 })
 // 获取订阅 更新订阅 删除订阅
@@ -252,9 +250,12 @@ ipcMain.on('get-sub', e => {
   })
 }).on('update', (e, r) => {
   addfile('nodes', r.nodes, res => {
-    res.nodes = []
+    res.nodes.length = 0
   })
-  addfile('sub', r.sub)
+  // 防止写入数据出错
+  setTimeout(() => {
+    addfile('sub', r.sub)
+  }, 1000)
 }).on('remove-sub', (e, sub) => {
   deleteData('sub', v => {
     return v !== sub
@@ -280,22 +281,26 @@ ipcMain.on('getConf', e => {
 }).on('setConf', (e, conf) => {
   openConf('a', null, res => {
     Object.assign(res.config, conf)
+    e.reply('config', res.config)
   })
 })
 // 开机启动
-ipcMain.on('set-login',(e,login)=>{
+ipcMain.on('set-login', (e, login) => {
   if (!app.isPackaged) {
     app.setLoginItemSettings({
       openAtLogin: login,
-      path: process.execPath
+      openAsHidden: true,
+      path: process.execPath,
+      args: ['.']
     })
   } else {
     app.setLoginItemSettings({
+      openAsHidden: true,
       openAtLogin: login
     })
   }
-}).on('get-login',e=>{
-  e.reply('login',app.getLoginItemSettings().openAtLogin)
+}).on('get-login', e => {
+  e.reply('login', app.getLoginItemSettings().openAtLogin)
 })
 
 // 菜单

@@ -12,7 +12,7 @@
     data() {
       return {
         connect: false,
-        now:''
+        now: ''
       }
     },
     mounted() {
@@ -21,11 +21,13 @@
       ipc.on('linked', () => {
         this.connect = true
         this.$message('已连接')
-      }).on('closed', (e, arg) => {
-        arg && console.log(arg.err.message)
-      }).on('config',(e,conf)=>{
-        const now=conf.mode==='night'?conf.night:conf.day
-        this.now=this.$global.now =now 
+      }).on('closed', () => {
+        if(this.connect)
+        return this.connect = false
+        this.$message('已断开')
+      }).on('config', (e, conf) => {
+        const now = conf.mode === 'night' ? conf.night : conf.day
+        this.now = this.$global.now = now
       })
     },
     methods: {
@@ -37,9 +39,6 @@
         let ipc = electron.ipcRenderer
         this.connect = false
         ipc.send('close')
-        if (this.connect) {
-          this.$message('已断开')
-        } else this.$message('您还未连接')
       }
     }
   }

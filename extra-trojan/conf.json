@@ -5,8 +5,8 @@
     "mode":"day",
     "proxy":"pac",
     "time":{
-      "startTime":"",
-      "endTime":""
+      "startTime":"17:30",
+      "endTime":"00:30"
     },
     "day":{},
     "night":{}

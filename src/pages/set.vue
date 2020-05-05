@@ -16,7 +16,8 @@
       </el-tab-pane>
       <el-tab-pane label="开机启动">
         <label>开机启动：</label>
-        <el-switch v-model="login" active-color="#13ce66" inactive-color="#ff4949"/>
+        <el-switch v-model="login" active-color="#13ce66" inactive-color="#ff4949" @change="changeLogin" />
+        <p>可能会不生效~</p>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -29,12 +30,12 @@
   export default {
     data() {
       return {
-        login:false,
-        proxy: 'pac',
+        login: false,
         tabPosition: 'right',
-        startTime: '19:30',
-        endTime: '00:30',
-        night: ''
+        proxy: null,
+        startTime: null,
+        endTime: null,
+        night: null
       }
     },
     mounted() {
@@ -54,25 +55,33 @@
         this.startTime = startTime
         this.endTime = endTime
         this.night = night
-      }).on('login',(e,login)=>{
-        this.login=login
+      }).on('login', (e, login) => {
+        this.login = login
       })
     },
     watch: {
-      'proxy': function(newval) {
+      'proxy': function(newval, old) {
+        if (!old) return;
         let ipc = electron.ipcRenderer
         ipc.send('setConf', {
           proxy: newval
         })
-        ipc.send('link')
+        ipc.send('close')
       },
-      login:function (newval) {
-        let ipc = electron.ipcRenderer
-        ipc.send('set-login',newval)
-        console.log(newval)
-      }
     },
     methods: {
+      changeLogin(e) {
+        let ipc = electron.ipcRenderer
+        ipc.send('set-login', e)
+        console.log(e)
+      },
+      // 延迟
+      relink() {
+        let ipc = electron.ipcRenderer
+        setTimeout(() => {
+          ipc.send('link')
+        }, 1000)
+      },
       selectNode() {
         const time = {
           startTime: this.startTime,
@@ -90,11 +99,11 @@
         setTimeout(() => {
           // 更换夜间节点
           ipc.send('change-linknode', 'night')
-          ipc.send('link')
+          this.relink()
           // 退出夜间节点
           setTimeout(() => {
             ipc.send('change-linknode')
-            ipc.send('link')
+            this.relink()
           }, t)
         }, bt)
         this.$message('更改成功')
