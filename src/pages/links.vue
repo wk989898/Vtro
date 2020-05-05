@@ -23,8 +23,8 @@
         this.$message('已连接')
       }).on('closed', (e, arg) => {
         arg && console.log(arg.err.message)
-      }).on('config',(e,conf)=>{
-        this.now=this.$global.now = conf.now
+      }).on('config',(e,node)=>{
+        this.now=this.$global.now = node
       })
     },
     methods: {

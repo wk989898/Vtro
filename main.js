@@ -138,15 +138,10 @@ function deleteData(name, condition) {
   })
 }
 /**
- * @param {string} type
- * 'r' - 打开文件用于读取
- * 'w' - 打开文件用于写入
- * 'a' - 打开文件用于追加
- * @param {any} data 
- * 写入数据  default :''
+ * @param {string} type r | w | a
+ * @param {any} data 写入数据  default :''
  * @callback cb
  * @param {object} res
- * 
  */
 function openConf(type, data = '', cb) {
   let file = 'trojan/conf.json'
@@ -171,6 +166,28 @@ function openConf(type, data = '', cb) {
     })
   }
 }
+// 更改 config.json
+function changeConfig() {
+  fs.readFile('./trojan/config.json', 'utf-8', (err, res) => {
+    if (err) appendLog(err)
+    let data = JSON.parse(res.toString())
+    let now
+    openConf('r',null,res=>{
+      const mode=res.config.mode
+      if(mode==='night'){
+        now=res.config.night
+      }else  now=res.config.day
+    })
+    // password,addr,port
+    data.remote_addr = now.addr
+    data.remote_port = now.port
+    data.password[0] = now.password
+    fs.writeFile('./trojan/config.json', JSON.stringify(data), 'utf-8', err => {
+      if (err) appendLog(err)
+    })
+  })
+}
+
 /** 监听事件 */
 // 获取当前节点 获取节点
 ipcMain.on('get-nodes', e => {
@@ -182,6 +199,7 @@ ipcMain.on('get-nodes', e => {
 // 连接 关闭
 ipcMain.on('link', (e, type) => {
   allquit()
+  changeConfig()
   trojan = cp.execFile('trojan.exe', {
     cwd: './trojan',
     windowsHide: true
@@ -195,7 +213,7 @@ ipcMain.on('link', (e, type) => {
   let arg
   if (!type)
     openConf('r', null, res => {
-      type = res.config.proxy
+      type = res.config.proxy||'pac'
     })
   if (type === 'global') {
     arg = `http://127.0.0.1:1081`
@@ -215,25 +233,16 @@ ipcMain.on('link', (e, type) => {
   allquit()
 })
 
-// 更改连接节点
-ipcMain.on('change-linknode', (e, now) => {
-  fs.readFile('./trojan/config.json', 'utf-8', (err, res) => {
-    if (err) appendLog(err)
-    openConf('a', null, res => {
-      if (now === 'night') now = res.config.night
-      else if (type(now) === 'object') {
-        res.config.now = now
-        e.reply('config', res.config)
-      } else now = res.config.now
-    })
-    let data = JSON.parse(res.toString())
-    // password,addr,port
-    data.remote_addr = now.addr
-    data.remote_port = now.port
-    data.password[0] = now.password
-    fs.writeFile('./trojan/config.json', JSON.stringify(data), 'utf-8', err => {
-      if (err) appendLog(err)
-    })
+// 更改连接节点 夜间节点
+ipcMain.on('change-linkNode', (e, node) => {
+  if(!node) return ;
+  openConf('a', null, res => {
+    res.config.day=node
+  })
+}).on('change-nightNode', (e, node) => {
+  if(!node) return ;
+  openConf('a', null, res => {
+    res.config.night = node
   })
 })
 // 获取订阅 更新订阅 删除订阅
@@ -263,18 +272,15 @@ ipcMain.on('add-node', (e, r) => {
   e.reply('deleted')
 })
 
-// config 设置     夜间节点
+// config 设置     
 ipcMain.on('getConf', e => {
   openConf('r', null, res => {
-    e.reply('config', res.config)
+    const config=res.config
+    e.reply('config', config.mode==='night'?config.night:config.day)
   })
 }).on('setConf', (e, conf) => {
   openConf('a', null, res => {
     Object.assign(res.config, conf)
-  })
-}).on('make-nightNode', (e, node) => {
-  openConf('a', null, res => {
-    res.config.night = node
   })
 })
 
@@ -319,8 +325,7 @@ var template = [
       },
     ]
   },
-  /**
-   *  {
+  /**{
     type: 'checkbox',
     label: '开机启动',
     checked: app.getLoginItemSettings().openAtLogin,
@@ -336,8 +341,7 @@ var template = [
         })
       }
     }
-  },
-   */
+  },*/
 ]
 if (!app.isPackaged) {
   template.push({

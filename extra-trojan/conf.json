@@ -2,6 +2,13 @@
   "nodes":[],
   "sub":[],
   "config":{
-    
+    "mode":"day",
+    "proxy":"pac",
+    "time":{
+      "startTime":"",
+      "endTime":""
+    },
+    "day":{},
+    "night":{}
   }
 }

@@ -62,7 +62,7 @@
       select(e, r, ele) {
         this.tr && (this.tr.style.backgroundColor = '')
         let ipc = electron.ipcRenderer
-        ipc.send('change-linknode', e)
+        ipc.send('change-linkNode', e)
         ipc.send('close')
       },
       contextmenu(r, d, e) {
@@ -97,7 +97,7 @@
             })
           })
         }else if(type === 'night'){
-          ipc.send('make-nightNode', host)
+          ipc.send('change-nightNode', host)
         }
         this.$refs.meun.style.height = '0'
       },
