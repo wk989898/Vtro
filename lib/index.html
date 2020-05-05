@@ -16,6 +16,10 @@
   <script>
     const process=require('process')
     const electron = require('electron')
+    const util=require('util')
+    const ping =require('ping')
+    const tcping = util.promisify(require('tcp-ping').ping)
+
     const {
       remote
     } = electron
