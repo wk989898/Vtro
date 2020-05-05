@@ -14,6 +14,10 @@
         <el-button @click="selectNode">更改</el-button>
         <p>夜间节点：{{night?night.name:'暂无设置'}}</p>
       </el-tab-pane>
+      <el-tab-pane label="开机启动">
+        <label>开机启动：</label>
+        <el-switch v-model="login" active-color="#13ce66" inactive-color="#ff4949"/>
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -25,6 +29,7 @@
   export default {
     data() {
       return {
+        login:false,
         proxy: 'pac',
         tabPosition: 'right',
         startTime: '19:30',
@@ -34,6 +39,7 @@
     },
     mounted() {
       let ipc = electron.ipcRenderer
+      ipc.send('get-login')
       ipc.send('getConf')
       ipc.on('config', (e, conf) => {
         let {
@@ -48,6 +54,8 @@
         this.startTime = startTime
         this.endTime = endTime
         this.night = night
+      }).on('login',(e,login)=>{
+        this.login=login
       })
     },
     watch: {
@@ -57,6 +65,11 @@
           proxy: newval
         })
         ipc.send('link')
+      },
+      login:function (newval) {
+        let ipc = electron.ipcRenderer
+        ipc.send('set-login',newval)
+        console.log(newval)
       }
     },
     methods: {

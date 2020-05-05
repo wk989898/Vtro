@@ -11,7 +11,7 @@ trojan 的 windows 图形界面
 - 支持 ping,tcp-ping
 - 根据时间改变节点  
   `开始结束时间相同视为关闭 默认：'19:30'-'00:30',`
-- [Conf 配置](./trojan/conf.json)
+- [Conf 配置](./extra-trojan/conf.json)
 
   - nodes `array<node>` 节点列表
   - sub `array` 订阅组
@@ -28,7 +28,7 @@ trojan 的 windows 图形界面
   |pac|localhost|1082/pac|
   |http|-|1081|
   |socks5|-|1080|
-  >设置 off 后只会开启 socks5 端口 !
+  > 设置 off 后只会开启 socks5 端口 !
 - time `object`
   - startTime default:`'17:30'`
   - endTime default:`'00:30'`
@@ -37,7 +37,7 @@ trojan 的 windows 图形界面
 
 ## 运行
 
-``` shell
+```shell
 npm run dist
 cd dist
 ```

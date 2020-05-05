@@ -172,11 +172,11 @@ function changeConfig() {
     if (err) appendLog(err)
     let data = JSON.parse(res.toString())
     let now
-    openConf('r',null,res=>{
-      const mode=res.config.mode
-      if(mode==='night'){
-        now=res.config.night
-      }else  now=res.config.day
+    openConf('r', null, res => {
+      const mode = res.config.mode
+      if (mode === 'night') {
+        now = res.config.night
+      } else now = res.config.day
     })
     // password,addr,port
     data.remote_addr = now.addr
@@ -213,7 +213,7 @@ ipcMain.on('link', (e, type) => {
   let arg
   if (!type)
     openConf('r', null, res => {
-      type = res.config.proxy||'pac'
+      type = res.config.proxy || 'pac'
     })
   if (type === 'global') {
     arg = `http://127.0.0.1:1081`
@@ -235,12 +235,12 @@ ipcMain.on('link', (e, type) => {
 
 // 更改连接节点 夜间节点
 ipcMain.on('change-linkNode', (e, node) => {
-  if(!node) return ;
+  if (!node) return;
   openConf('a', null, res => {
-    res.config.day=node
+    res.config.day = node
   })
 }).on('change-nightNode', (e, node) => {
-  if(!node) return ;
+  if (!node) return;
   openConf('a', null, res => {
     res.config.night = node
   })
@@ -275,19 +275,33 @@ ipcMain.on('add-node', (e, r) => {
 // config 设置     
 ipcMain.on('getConf', e => {
   openConf('r', null, res => {
-    const config=res.config
-    e.reply('config', config.mode==='night'?config.night:config.day)
+    e.reply('config', res.config)
   })
 }).on('setConf', (e, conf) => {
   openConf('a', null, res => {
     Object.assign(res.config, conf)
   })
 })
-
+// 开机启动
+ipcMain.on('set-login',(e,login)=>{
+  if (!app.isPackaged) {
+    app.setLoginItemSettings({
+      openAtLogin: login,
+      path: process.execPath
+    })
+  } else {
+    app.setLoginItemSettings({
+      openAtLogin: login
+    })
+  }
+}).on('get-login',e=>{
+  e.reply('login',app.getLoginItemSettings().openAtLogin)
+})
 
 // 菜单
 var template = [
   {
+    type: 'submenu',
     id: 'list',
     label: '设置节点',
     submenu: [
@@ -300,48 +314,29 @@ var template = [
   },
   {
     id: 'set',
-    label: '设置'
+    label: '设置',
+    click() {
+      send('set')
+    }
   },
   {
     id: 'log',
     label: '日志',
     submenu: [
       {
-        id: 'trojanlog', label: 'trojan日志',
+        id: 'trojan-log', label: 'trojan日志',
         click: () => {
-          try {
-            shell.openItem(path.resolve('trojan/trojan-log.txt'))
-          } catch (e) {
-          }
+          shell.openItem(path.resolve('trojan/trojan-log.txt'))
         }
       },
       {
         id: 'linklog', label: '连接日志', click() {
-          try {
-            shell.openItem(path.resolve('trojan/log.txt'))
-          } catch (e) {
-          }
+          shell.openItem(path.resolve('trojan/log.txt'))
         }
       },
     ]
   },
-  /**{
-    type: 'checkbox',
-    label: '开机启动',
-    checked: app.getLoginItemSettings().openAtLogin,
-    click(){
-      if (!app.isPackaged) {
-        app.setLoginItemSettings({
-          openAtLogin: !app.getLoginItemSettings().openAtLogin,
-          path: process.execPath
-        })
-      } else {
-        app.setLoginItemSettings({
-          openAtLogin: !app.getLoginItemSettings().openAtLogin
-        })
-      }
-    }
-  },*/
+
 ]
 if (!app.isPackaged) {
   template.push({
@@ -356,20 +351,9 @@ Menu.setApplicationMenu(menu)
 function send(channel, args) {
   return win.webContents.send(channel, args)
 }
-
-menu.items.forEach(value => {
-  let child = value.submenu
-  if (value.id === 'log') return;
-  if (value.id === 'refresh') return;
-  if (child) {
-    child.items.forEach(val => {
-      val.click = () => {
-        send(val.id)
-      }
-    })
-  } else {
-    value.click = () => {
-      send(value.id)
-    }
+// 设置节点
+menu.items[0].submenu.items.forEach(val => {
+  val.click = () => {
+    send(val.id)
   }
 })

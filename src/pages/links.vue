@@ -23,8 +23,9 @@
         this.$message('已连接')
       }).on('closed', (e, arg) => {
         arg && console.log(arg.err.message)
-      }).on('config',(e,node)=>{
-        this.now=this.$global.now = node
+      }).on('config',(e,conf)=>{
+        const now=conf.mode==='night'?conf.night:conf.day
+        this.now=this.$global.now =now 
       })
     },
     methods: {
