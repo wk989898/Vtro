@@ -1,7 +1,7 @@
 <template>
   <div>
-    <el-button type="primary" id="link" @click="connect('link')">连接</el-button>
-    <el-button type="primary" id="close" @click="connect('close')">关闭</el-button>
+    <el-button type="primary" id="link" @click="btnclick('link')">连接</el-button>
+    <el-button type="primary" id="close" @click="btnclick('close')">关闭</el-button>
     <el-switch v-model="connect" disabled active-color="#13ce66" inactive-color="#ff4949" style="z-index:9"></el-switch>
     <span class="now">连接节点：{{now.name}}</span>
   </div>
@@ -38,7 +38,7 @@
       })
     },
     methods: {
-      connect(type) {
+      btnclick(type) {
         let ipc = electron.ipcRenderer
         ipc.send(type)
       }
