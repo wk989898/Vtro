@@ -12,7 +12,6 @@
       <el-table-column prop="ping" label="ping(ms)">
       </el-table-column>
     </el-table>
-    
     <div id="menu" ref="meun">
       <div class="menu" @click="contextClick('delete',$event)">删除</div>
       <div class="menu" @click="contextClick('update',$event)">修改</div>
@@ -40,8 +39,11 @@
     },
     mounted() {
       let ipc = electron.ipcRenderer
+      ipc.send('get-nodes')
       ipc.on('update-nodes', (e, arg) => {
+        console.log('更新节点')
         this.nodes = this.$global.nodes = arg
+        this.$forceUpdate()
       }).on('ping', e => {
         makeping(this.nodes)
       }).on('tcp-ping', e => {
@@ -51,19 +53,18 @@
       })
     },
     activated() {
-      if ((!this.nodes) || (!this.$global.nodes[0])) {
-        let ipc = electron.ipcRenderer
-        ipc.send('get-nodes')
-      } else
-        this.nodes = this.$global.nodes
-      this.$forceUpdate()
+      let ipc = electron.ipcRenderer
+      if (this.nodes)
+        setTimeout(() => {
+          ipc.send('get-nodes')
+        }, 1000)
     },
     methods: {
       select(e, r, ele) {
         this.tr && (this.tr.style.backgroundColor = '')
         let ipc = electron.ipcRenderer
         ipc.send('change-linkNode', e)
-        this.$global.link&&ipc.send('close')
+        this.$global.link && ipc.send('close')
       },
       contextmenu(r, d, e) {
         let meun = this.$refs.meun
@@ -96,9 +97,9 @@
               if (v === host) v.ping = result
             })
           })
-        }else if(type === 'night'){
+        } else if (type === 'night') {
           ipc.send('change-nightNode', host)
-          this.$global.link&&ipc.send('close')
+          this.$global.link && ipc.send('close')
         }
         this.$refs.meun.style.height = '0'
       },

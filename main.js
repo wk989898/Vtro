@@ -4,6 +4,7 @@ const fs = require('fs')
 const cp = require('child_process')
 const http = require('http')
 const process = require('process')
+const dns = require('dns')
 
 
 var win, tray, trojan, privo, privoxypid, trojanpid
@@ -121,13 +122,17 @@ function allquit() {
 }
 // 添加文件
 async function addfile(name, chunk, cb) {
-  if (!chunk) return appendLog(`there is no chunk`)
+  if (!chunk) {
+    appendLog(`there is no chunk`)
+    return Promise.resolve(false)
+  }
   await openConf('a', null, res => {
     cb && cb(res)
     if (type(chunk) === 'array') {
       res[name].unshift(...chunk)
     } else { res[name].unshift(chunk) }
   })
+  return Promise.resolve(true)
 }
 // 删除数据
 function deleteData(name, condition) {
@@ -158,13 +163,11 @@ async function openConf(type, data = '', cb) {
       if (err) appendLog(err)
     })
   } else if (type === 'a') {
-    return await fs.readFile(file, 'utf-8', async (err, res) => {
+    return await fs.readFile(file, 'utf-8', (err, res) => {
       if (err) appendLog(err)
       res = JSON.parse(res.toString())
-      await cb(res)
-      fs.writeFile(file, JSON.stringify(res), err => {
-        if (err) appendLog(err)
-      })
+      cb(res)
+      fs.writeFileSync(file, JSON.stringify(res))
     })
   }
 }
@@ -175,7 +178,7 @@ function changeConfig() {
     let data = JSON.parse(res.toString())
     openConf('r', null, res => {
       let now
-      if (!res.config.night)  now = res.config.day
+      if (!res.config.night) now = res.config.day
       else now = res.config.mode === 'night' ? res.config.night : res.config.day
       // password,addr,port
       data.remote_addr = now.addr
@@ -258,17 +261,15 @@ ipcMain.on('get-sub', e => {
     e.reply('subs', res.sub || [])
   })
 }).on('update', (e, r) => {
-  Promise.resolve(
-    addfile('nodes', r.nodes, res => {
-      res.nodes.length = 0
-    })
-  ).then(e => {
+  addfile('nodes', r.nodes, res => {
+    res.nodes.length = 0
+  }).finally(e => {
     // 防止写入数据出错
     setTimeout(() => {
       addfile('sub', r.sub, res => {
         res.sub.length = 0
       })
-    }, 3000)
+    }, 1000)
   })
 }).on('remove-sub', (e, sub) => {
   deleteData('sub', v => {
@@ -278,11 +279,17 @@ ipcMain.on('get-sub', e => {
 })
 
 // 手动添加节点 删除节点
-ipcMain.on('add-node', (e, r) => {
-  addfile('nodes', r.data)
+ipcMain.on('add-node', (e, node) => {
+  dns.resolve4(node.addr, (err, addresses) => {
+    if (err) node.ip = '0';
+    type(addresses)==='array'&&(addresses=(addresses[0]))
+    node.ip = addresses
+    addfile('nodes', node)
+  })
 }).on('delete-node', (e, ip) => {
   deleteData('nodes', v => {
-    return v.ip !== ip
+    if (v.ip) return v.ip !== ip
+    return v.addr !== v.addr
   })
   e.reply('deleted')
 })

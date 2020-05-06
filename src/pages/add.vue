@@ -2,20 +2,20 @@
   <div>
     <div>
       <el-tag type="info" effect="dark">链接</el-tag>
-      <el-input placeholder="请输入链接" v-model="tro" clearable/>
+      <el-input placeholder="请输入链接" v-model="tro" clearable />
       <el-button type="primary" @click="addtro">添加</el-button>
     </div>
     <el-divider></el-divider>
     <el-tag type="info" effect="dark">手动</el-tag>
     <el-form ref="form" :model="form" label-width="50px">
       <el-form-item label="地址">
-        <el-input v-model="form.addr"></el-input>
+        <el-input v-model="form.addr" placeholder="xyz.com"></el-input>
       </el-form-item>
       <el-form-item label="端口">
         <el-input v-model="form.port"></el-input>
       </el-form-item>
       <el-form-item label="密码">
-        <el-input v-model="form.password"></el-input>
+        <el-input v-model="form.password" placeholder="请不要使用 @ 符号"></el-input>
       </el-form-item>
       <el-form-item label="备注">
         <el-input type="textarea" v-model="form.name"></el-input>
@@ -34,7 +34,7 @@
       return {
         form: {
           addr: '',
-          port: '',
+          port: 443,
           password: '',
           name: ''
         },
@@ -45,16 +45,18 @@
       add() {
         let form = this.form
         let data = {
-          addr: form.addr,
-          port: form.port,
-          name: form.name,
           password: form.password,
+          ip: '',
+          port: parseInt(form.port),
           allow: 1,
-          ping:0
+          addr: form.addr,
+          name: form.name,
+          ping: 0
         }
-        if (typeof form.addr=='string' && typeof from.port=='number' && form.name && form.password)
+        if (form.addr && typeof form.addr == 'string' && form.port && typeof form.port == 'number' &&
+          form.name && form.password)
           this.addnode(data)
-          else this.$message('请输入正确的格式!')
+        else this.$message('请输入正确的格式!')
       },
       addtro() {
         let data = Trojan.toTrojan(this.tro)
@@ -62,10 +64,7 @@
       },
       addnode(data) {
         let ipc = electron.ipcRenderer
-        this.$global.nodes && this.$global.nodes.unshift(data)
-        ipc.send('add-node', {
-          data
-        })
+        ipc.send('add-node', data)
         this.$router.push('/')
       }
     }
