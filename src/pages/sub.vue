@@ -37,19 +37,29 @@
     methods: {
       async update() {
         let ipc = electron.ipcRenderer
-        const list=Array.from(new Set(this.subs).add(this.sub))
+        const list = Array.from(new Set(this.subs).add(this.sub))
+        console.time('axios')
         let nodes = [],
           i = 0,
           j = list.length
         for (; i < j; i++)
-          await this.$axios.get(list[i]).then(res => {
-            nodes.push(Trojan.subscribe(res.data))
-          }).catch(e => {
-            console.log(e)
-            if (!this.confirm) this.confirm = true
-          })
+        //
+          // nodes.push(this.$axios.get(list[i]))
+          // await this.$axios.all(nodes).then(this.$axios.spread((...res) => {
+          //   nodes=Trojan.subscribe(res[0].data)
+          // })).catch(e => {
+          //   console.log(e)
+          //   if (!this.confirm) this.confirm = true
+          // })
+        // 
+        await this.$axios.get(list[i]).then(res => {
+          nodes.push(Trojan.subscribe(res.data))
+        }).catch(e => {
+          console.log(e)
+          if (!this.confirm) this.confirm = true
+        })
+        console.timeEnd('axios')
         nodes=this.$global.nodes = nodes.flat(Infinity)
-        
         ipc.send('update', {
           nodes,
           sub: list

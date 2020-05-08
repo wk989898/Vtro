@@ -2,7 +2,7 @@
   <div class="main">
     <el-collapse v-model="activeNames">
       <el-collapse-item title="连接" name="1">
-        <links :proxy="mode" :now="now"/>
+        <links :proxy="mode" :now="now" />
       </el-collapse-item>
       <el-collapse-item :title="type" name="2">
         <keep-alive>
@@ -34,17 +34,22 @@
     },
     mounted() {
       let ipc = electron.ipcRenderer
+      // test
+      ipc.on('test', (e, r) => {
+        console.log(r)
+      })
+      //
       let o = {
         sub: '订阅',
         add: '添加节点',
         set: '设置',
         nodes: '节点列表'
       }
-      let route = ['sub',  'add', 'set', 'nodes']
+      let route = ['sub', 'add', 'set', 'nodes']
       route.forEach(v => {
         ipc.on(v, (e, arg) => {
-            this.$router.push(`/${v}`)
-            this.type = o[v]
+          this.$router.push(`/${v}`)
+          this.type = o[v]
         })
       })
     }

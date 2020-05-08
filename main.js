@@ -9,7 +9,6 @@ const dns = require('dns')
 
 var win, tray, trojan, privo, privoxypid, trojanpid
 const server = http.createServer()
-const resourcesPath = path.resolve(process.resourcesPath)
 
 function createWindow() {
   win = new BrowserWindow({
@@ -28,32 +27,46 @@ function createWindow() {
   })
 }
 
-
 app.name = "Vtro"
-app.on('ready', () => {
-  createWindow()
-  //  开发者工具
-  const isPackaged = app.isPackaged
-  !isPackaged && win.webContents.openDevTools()
-  // tray 路径为运行时路径 ./resource
-  tray = new Tray(
-    isPackaged ? path.resolve(resourcesPath, 'tray.ico') : 'tray.ico'
-  )
-  let traylist = [
-    {
-      label: '退出',
-      click() {
-        app.exit()
-      }
+// 应用锁
+const Lock = app.requestSingleInstanceLock()
+if (!Lock) {
+  app.quit()
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    // 当运行第二个实例时,将会聚焦到win这个窗口
+    if (win) {
+      if (win.isMinimized()) win.restore()
+      win.focus()
+      win.show()
     }
-  ]
-  const contextMenu = Menu.buildFromTemplate(traylist)
-  tray.setToolTip('Vtro')
-  tray.setContextMenu(contextMenu)
-  tray.on('click', () => {
-    !win.isVisible() && win.show()
   })
-})
+  app.on('ready', () => {
+    createWindow()
+    //  开发者工具
+    const isPackaged = app.isPackaged
+    !isPackaged && win.webContents.openDevTools()
+    // tray 路径为运行时路径 ./resource
+    tray = new Tray(
+      isPackaged ? path.resolve(app.getAppPath(), '../tray.ico') : 'tray.ico'
+    )
+    let traylist = [
+      {
+        label: '退出',
+        click() {
+          app.exit()
+        }
+      }
+    ]
+    const contextMenu = Menu.buildFromTemplate(traylist)
+    tray.setToolTip('Vtro')
+    tray.setContextMenu(contextMenu)
+    tray.on('click', () => {
+      !win.isVisible() && win.show()
+    })
+  })
+}
+
 
 app.on('before-quit', () => {
   allquit()
@@ -76,7 +89,8 @@ function type(a) {
   return Object.prototype.toString.call(a).slice(8).replace(']', '').toLowerCase()
 }
 function _path(p) {
-  return path.resolve(p)
+  let Path=app.isPackaged?path.resolve(app.getPath('exe'),'../'):''
+  return path.resolve(Path,p)
 }
 // 添加日志
 function appendLog(err, path) {
@@ -95,7 +109,7 @@ server.on('request', (req, res) => {
 })
 function makeproxy(type, arg, list) {
   cp.execFile('./sysproxy.exe', [type, arg, list], {
-    cwd: './proxy',
+    cwd: _path('./proxy'),
     windowsHide: true
   }, (err, stdout, stderr) => {
     if (err) appendLog(err) && server.close()
@@ -105,7 +119,7 @@ function makeproxy(type, arg, list) {
 // http -> socks
 function privoxy() {
   privo = cp.execFile('./privoxy.exe', {
-    cwd: './proxy',
+    cwd: _path('./proxy'),
     windowsHide: true
     // shell: true,
   }, (err) => {
@@ -172,11 +186,11 @@ async function openConf(type, data = '', cb) {
   }
 }
 // 更改 config.json
-function changeConfig() {
+function changeConfig(e) {
   fs.readFile(_path('./trojan/config.json'), 'utf-8', (err, res) => {
     if (err) appendLog(err)
     let data = JSON.parse(res.toString())
-    openConf('r', null, res => {
+    openConf('r', null, async res => {
       let now
       if (!res.config.night) now = res.config.day
       else now = res.config.mode === 'night' ? res.config.night : res.config.day
@@ -184,8 +198,9 @@ function changeConfig() {
       data.remote_addr = now.addr
       data.remote_port = now.port
       data.password[0] = now.password
-      fs.writeFile(_path('./trojan/config.json'), JSON.stringify(data), 'utf-8', err => {
+      await fs.writeFile(_path('./trojan/config.json'), JSON.stringify(data), 'utf-8', err => {
         if (err) appendLog(err)
+        e.reply('config',res.config)
       })
     })
   })
@@ -202,9 +217,9 @@ ipcMain.on('get-nodes', e => {
 // 连接 关闭
 ipcMain.on('link', (e, type) => {
   allquit()
-  changeConfig()
+  changeConfig(e)
   trojan = cp.execFile('trojan.exe', {
-    cwd: './trojan',
+    cwd: _path('./trojan'),
     windowsHide: true
   }, (err, stdout, stderr) => {
     if (err) appendLog(stderr, _path('./trojan/trojan-log.txt'))
@@ -282,7 +297,7 @@ ipcMain.on('get-sub', e => {
 ipcMain.on('add-node', (e, node) => {
   dns.resolve4(node.addr, (err, addresses) => {
     if (err) node.ip = '0';
-    type(addresses)==='array'&&(addresses=(addresses[0]))
+    type(addresses) === 'array' && (addresses = (addresses[0]))
     node.ip = addresses
     addfile('nodes', node)
   })
@@ -310,9 +325,7 @@ ipcMain.on('set-login', (e, login) => {
   if (!app.isPackaged) {
     app.setLoginItemSettings({
       openAtLogin: login,
-      openAsHidden: true,
-      path: process.execPath,
-      args: ['.']
+      openAsHidden: true
     })
   } else {
     app.setLoginItemSettings({
@@ -352,12 +365,12 @@ var template = [
       {
         id: 'trojan-log', label: 'trojan日志',
         click: () => {
-          shell.openItem(path.resolve('trojan/trojan-log.txt'))
+          shell.openItem(_path('trojan/trojan-log.txt'))
         }
       },
       {
         id: 'linklog', label: '连接日志', click() {
-          shell.openItem(path.resolve('trojan/log.txt'))
+          shell.openItem(_path('trojan/log.txt'))
         }
       },
     ]
