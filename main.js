@@ -351,13 +351,13 @@ var template = [
       { id: 'tcp-ping', label: 'tcp-ping' }
     ]
   },
-  {
-    id: 'set',
-    label: '设置',
-    click() {
-      send('set')
-    }
-  },
+  // {
+  //   id: 'set',
+  //   label: '设置',
+  //   click() {
+  //     send('set')
+  //   }
+  // },
   {
     id: 'log',
     label: '日志',

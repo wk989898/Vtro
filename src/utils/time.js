@@ -16,34 +16,14 @@ export function calcTime({ startTime, endTime }) {
     (hour < endhour || (hour == endhour && endmin < min))
   ) {
     // on 剩余时间
+    console.log('on')
     let t = ((endhour*60+endmin)-(hour*60+min))*60
     return [true, t]
   } else {
     // off bt后开启 last 持续时间
+    console.log('off')
     let bt = ((starthour*60+startmin)+(hour*60+min))*60
     let last = ((endhour*60+endmin)-(starthour*60+startmin))*60
     return [false, last, bt]
   }
-
-  /**
-   * 1 隔夜
-   * 2 不隔夜
-   */
-  // if (endhour < starthour ||
-  //   (endhour == starthour || endmin < startmin)) {
-  //   if ((hour > starthour || (hour == starthour || min > startmin)) ||
-  //     (hour < endhour || (hour == endhour || endmin < min))
-  //   ) {
-  //     // on 
-  //   } else {
-  //     // off
-  //   }
-  // } else {
-  //   if ((hour > starthour || (hour == starthour || min > startmin)) &&
-  //     (hour < endhour || (hour == endhour || endmin < min))
-  //   ) {
-  //     // on
-  //   }else{
-  //     // off
-  //   }
 }

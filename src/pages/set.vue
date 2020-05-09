@@ -46,7 +46,6 @@
     mounted() {
       let ipc = electron.ipcRenderer
       ipc.send('get-login')
-      ipc.send('getConf')
       ipc.on('config', (e, conf) => {
         let {
           proxy,
@@ -60,6 +59,11 @@
         this.startTime = startTime
         this.endTime = endTime
         this.night = night
+        console.log('set')
+        this.opneNight({
+          startTime,
+          endTime
+        })
       }).on('login', (e, login) => {
         this.login = login
       }).on('mode', () => {
@@ -111,7 +115,7 @@
         if (this.$global.pid1 || this.$global.pid2) return false;
         let ipc = electron.ipcRenderer
         const [isOpen, t, bt = 0] = calcTime(time)
-        console.log(isOpen,t,bt)
+        console.log(isOpen, t, bt)
         if (t === 0) {
           this.$message('设置夜间节点无效')
           return false

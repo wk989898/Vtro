@@ -11,7 +11,6 @@ Vue.use(Router)
 import sub from '../pages/sub'
 import nodes from '../pages/nodes'
 import add from '../pages/add'
-import set from '../pages/set'
 
 const routes=[
   {
@@ -29,10 +28,6 @@ const routes=[
   {
     path:'/add',
     component:add  
-  },
-  {
-    path:'/set',
-    component:set  
   }
 ]
 const router=new Router({

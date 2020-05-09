@@ -50,6 +50,7 @@ cd dist
 
 - 更改单个节点
 - 分享节点
+- 新的 UI 
 
 ## Credits
 
