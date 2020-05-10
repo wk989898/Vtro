@@ -41,7 +41,7 @@
       let ipc = electron.ipcRenderer
       ipc.send('get-nodes')
       ipc.on('update-nodes', (e, arg) => {
-        console.log('更新节点')
+        console.log('update-nodes')
         this.nodes = this.$global.nodes = arg
         this.$forceUpdate()
       }).on('ping', e => {
@@ -52,19 +52,11 @@
         ipc.send('get-nodes')
       })
     },
-    activated() {
-      let ipc = electron.ipcRenderer
-      if (this.nodes)
-        setTimeout(() => {
-          ipc.send('get-nodes')
-        }, 1000)
-    },
     methods: {
       select(e, r, ele) {
         this.tr && (this.tr.style.backgroundColor = '')
         let ipc = electron.ipcRenderer
         ipc.send('change-linkNode', e)
-        this.$global.link && ipc.send('close')
       },
       contextmenu(r, d, e) {
         let meun = this.$refs.meun
@@ -99,7 +91,6 @@
           })
         } else if (type === 'night') {
           ipc.send('change-nightNode', host)
-          this.$global.link && ipc.send('close')
         }
         this.$refs.meun.style.height = '0'
       },

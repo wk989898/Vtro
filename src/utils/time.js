@@ -17,13 +17,13 @@ export function calcTime({ startTime, endTime }) {
   ) {
     // on 剩余时间
     console.log('on')
-    let t = ((endhour*60+endmin)-(hour*60+min))*60
-    return [true, t]
+    let last = ((endhour*60+endmin)-(hour*60+min))*60
+    return [true, last]
   } else {
     // off bt后开启 last 持续时间
     console.log('off')
     let bt = ((starthour*60+startmin)+(hour*60+min))*60
     let last = ((endhour*60+endmin)-(starthour*60+startmin))*60
-    return [false, last, bt]
+    return [false, last===0?0:bt+last, bt]
   }
 }

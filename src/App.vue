@@ -4,13 +4,13 @@
       <el-collapse-item title="连接" name="1">
         <links />
       </el-collapse-item>
-      <el-collapse-item :title="type" name="2">
+      <el-collapse-item title="节点" name="2">
+        <nodes />
+      </el-collapse-item>
+      <el-collapse-item :title="type" name="3">
         <keep-alive>
           <router-view />
         </keep-alive>
-      </el-collapse-item>
-      <el-collapse-item title="设置" name="3">
-        <set />
       </el-collapse-item>
     </el-collapse>
     <back/>
@@ -19,20 +19,20 @@
 
 <script>
   import links from './pages/links'
-  import set  from './pages/set'
+  import nodes from './pages/nodes'
   import back from './components/back'
   export default {
     name: 'App',
     data() {
       return {
-        activeNames: ['1', '3'],
+        activeNames: ['1', '2', '3'],
         type: '节点列表'
       }
     },
     components: {
       links,
       back,
-      set
+      nodes
     },
     created() {
       this.$router.push(`/`)
@@ -47,13 +47,13 @@
       let o = {
         sub: '订阅',
         add: '添加节点',
-        nodes: '节点列表'
+        set: '设置'
       }
-      let route = ['sub', 'add', 'nodes']
-      route.forEach(v => {
+      Object.keys(o).forEach(v => {
         ipc.on(v, (e, arg) => {
           this.$router.push(`/${v}`)
           this.type = o[v]
+          this.activeNames = ['1', '3']
         })
       })
     }

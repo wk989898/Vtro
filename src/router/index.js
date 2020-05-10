@@ -9,17 +9,17 @@ Vue.use(Router)
 // const ping =()=>import( '../pages/ping')
 // const set =()=>import('../pages/set')
 import sub from '../pages/sub'
-import nodes from '../pages/nodes'
 import add from '../pages/add'
+import set from '../pages/set'
 
 const routes=[
   {
     path:'/',
-    redirect:'/nodes'
+    redirect:'/set'
   },
   {
-    path:'/nodes',
-    component:nodes
+    path:'/set',
+    component:set
   },
   {
     path:'/sub',

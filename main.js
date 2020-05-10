@@ -200,20 +200,13 @@ function changeConfig(e) {
       data.password[0] = now.password
       await fs.writeFile(_path('./trojan/config.json'), JSON.stringify(data), 'utf-8', err => {
         if (err) appendLog(err)
-        e.reply('config',res.config)
       })
     })
   })
 }
 
 /** 监听事件 */
-// 获取当前节点 获取节点
-ipcMain.on('get-nodes', e => {
-  openConf('r', null, res => {
-    if (!res.nodes) return appendLog(`please check your conf.json`)
-    e.reply('update-nodes', res.nodes)
-  })
-})
+
 // 连接 关闭
 ipcMain.on('link', (e, type) => {
   allquit()
@@ -251,8 +244,13 @@ ipcMain.on('link', (e, type) => {
   console.log('link is closed')
 })
 
-// 更改连接节点 夜间节点 mode
-ipcMain.on('change-linkNode', (e, node) => {
+// 获取节点 更改连接节点 夜间节点 mode
+ipcMain.on('get-nodes', e => {
+  openConf('r', null, res => {
+    if (!res.nodes) return appendLog(`please check your conf.json`)
+    e.reply('update-nodes', res.nodes)
+  })
+}).on('change-linkNode', (e, node) => {
   if (!node) return;
   openConf('a', null, res => {
     res.config.day = node
@@ -346,18 +344,17 @@ var template = [
     submenu: [
       { id: 'sub', label: '订阅' },
       { id: 'add', label: '添加节点' },
-      { id: 'nodes', label: '节点列表' },
       { id: 'ping', label: 'ping' },
       { id: 'tcp-ping', label: 'tcp-ping' }
     ]
   },
-  // {
-  //   id: 'set',
-  //   label: '设置',
-  //   click() {
-  //     send('set')
-  //   }
-  // },
+  {
+    id: 'set',
+    label: '设置',
+    click() {
+      send('set')
+    }
+  },
   {
     id: 'log',
     label: '日志',

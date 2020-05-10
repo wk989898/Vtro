@@ -64,6 +64,9 @@
           nodes,
           sub: list
         })
+        setTimeout(() => {
+          ipc.send('get-nodes')
+        }, 1000);
         this.confirm = false
         this.$router.push('/')
       },

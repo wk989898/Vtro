@@ -59,17 +59,19 @@
         this.startTime = startTime
         this.endTime = endTime
         this.night = night
-        console.log('set')
-        this.opneNight({
-          startTime,
-          endTime
-        })
       }).on('login', (e, login) => {
         this.login = login
       }).on('mode', () => {
         ipc.send('getConf')
-        this.$global.link && ipc.send('link')
+        if (this.$global.link) ipc.send('link')
       })
+      setTimeout(() => {
+        console.log('set')
+        this.opneNight({
+          startTime: this.startTime,
+          endTime: this.endTime
+        })
+      }, 1000)
     },
     watch: {
       'proxy': function(newval, old) {
@@ -111,23 +113,23 @@
         const tem = this.opneNight(time)
         tem && this.$message('更改成功')
       },
+      timer(mode, timeout, cb) {
+        let ipc = electron.ipcRenderer
+        return window.setTimeout(() => {
+          ipc.send('change-mode', mode)
+        }, timeout);
+      },
       opneNight(time) {
         if (this.$global.pid1 || this.$global.pid2) return false;
         let ipc = electron.ipcRenderer
-        const [isOpen, t, bt = 0] = calcTime(time)
-        console.log(isOpen, t, bt)
-        if (t === 0) {
+        const [isOpen, last, night = 0] = calcTime(time)
+        if (last === 0) {
           this.$message('设置夜间节点无效')
           return false
         }
-        this.$global.pid1 = setTimeout(() => {
-          // 进入夜间节点
-          ipc.send('change-mode', 'night')
-          // 退出夜间节点
-          this.$global.pid2 = setTimeout(() => {
-            ipc.send('change-mode', 'day')
-          }, t)
-        }, bt)
+        console.log(isOpen, last, night)
+        this.$global.pid1 = this.timer('night', night * 1000)
+        this.$global.pid2 = this.timer('day', last * 1000)
         return true
       }
     }

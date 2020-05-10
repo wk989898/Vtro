@@ -26,15 +26,19 @@
         this.$message('已连接')
         this.$global.link = true
       }).on('closed', () => {
-        if (this.connect)
-          this.connect = false
+        this.connect = false
         if (this.$global.link)
           this.$message('已断开')
         this.$global.link = false
       }).on('config', (e, conf) => {
-        console.log(conf.mode)
-        const now = conf.mode === 'night' ? conf.night : conf.day
+        const now = conf.mode === 'night' ? conf.night : conf.day;
+        if (this.$global.link && conf.mode===this.now.mode&&now.name !== this.now.name) {
+          // 原来连接 && mode相同 && 名字相同
+          ipc.send('link')
+          console.log('re-connect', conf.mode);
+        }
         this.now = this.$global.now = now
+        this.now.mode=conf.mode
       })
     },
     methods: {
