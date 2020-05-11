@@ -1,6 +1,7 @@
 <template>
   <div class="nodes">
-    <el-table :data="nodes" border style="width: 100%" highlight-current-row @row-dblclick="select" @row-contextmenu="contextmenu">
+    <el-table :data="nodes" border style="width: 100%"
+    :row-class-name="tableRowClassName" @row-dblclick="select" @row-contextmenu="contextmenu">
       <el-table-column prop="ip" label="ip" width="180">
       </el-table-column>
       <el-table-column prop="name" label="名称" width="180">
@@ -34,7 +35,7 @@
       return {
         nodes: null,
         node: null,
-        tr: null
+        idx: null
       }
     },
     mounted() {
@@ -53,8 +54,15 @@
       })
     },
     methods: {
+       tableRowClassName({row, rowIndex}) {
+        if (rowIndex === this.idx) return 'select-row';
+        return '';
+      },
       select(e, r, ele) {
-        this.tr && (this.tr.style.backgroundColor = '')
+        this.nodes.forEach((v,i)=>{
+          if(v===e) this.idx=i 
+        })
+        console.log('select node index:',this.idx)
         let ipc = electron.ipcRenderer
         ipc.send('change-linkNode', e)
       },
@@ -123,5 +131,8 @@
   }
   #menu .menu:hover {
     background: #ccc;
+  }
+   .el-table .select-row {
+    background: rgb(172, 255, 208);
   }
 </style>

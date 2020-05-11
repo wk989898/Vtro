@@ -11,7 +11,6 @@ export function calcTime({ startTime, endTime }) {
   endhour<starthour?endhour+24:
   // hour 相同  17:30 -> 17:00
   endmin>startmin?endhour:endhour+24
-  console.log(endhour)
   if ((hour > starthour || (hour == starthour && min > startmin)) &&
     (hour < endhour || (hour == endhour && endmin < min))
   ) {

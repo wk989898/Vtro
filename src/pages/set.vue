@@ -33,8 +33,9 @@
   export default {
     data() {
       return {
-        login: false,
         tabPosition: 'right',
+        mode: null,
+        login: false,
         proxy: null,
         startTime: null,
         endTime: null,
@@ -50,6 +51,7 @@
         let {
           proxy,
           night,
+          mode,
           time: {
             startTime,
             endTime
@@ -59,6 +61,7 @@
         this.startTime = startTime
         this.endTime = endTime
         this.night = night
+        this.mode = mode
       }).on('login', (e, login) => {
         this.login = login
       }).on('mode', () => {
@@ -66,7 +69,6 @@
         if (this.$global.link) ipc.send('link')
       })
       setTimeout(() => {
-        console.log('set')
         this.opneNight({
           startTime: this.startTime,
           endTime: this.endTime
@@ -127,7 +129,8 @@
           this.$message('设置夜间节点无效')
           return false
         }
-        console.log(isOpen, last, night)
+        console.log('time.js', isOpen, last, night)
+        night && this.mode === 'night' && this.timer('day', 0)
         this.$global.pid1 = this.timer('night', night * 1000)
         this.$global.pid2 = this.timer('day', last * 1000)
         return true
