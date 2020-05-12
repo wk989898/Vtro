@@ -291,7 +291,7 @@ ipcMain.on('get-sub', e => {
   e.reply('removed')
 })
 
-// 手动添加节点 删除节点
+// 手动添加节点 删除节点  更改节点配置
 ipcMain.on('add-node', (e, node) => {
   dns.resolve4(node.addr, (err, addresses) => {
     if (err) node.ip = '0';
@@ -305,6 +305,10 @@ ipcMain.on('add-node', (e, node) => {
     return v.addr !== v.addr
   })
   e.reply('deleted')
+}).on('update-node',(e,nodes)=>{
+  openConf('a',null,res=>{
+    res.nodes=nodes
+  })
 })
 
 // config 设置     

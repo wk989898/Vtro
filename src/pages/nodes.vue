@@ -1,7 +1,6 @@
 <template>
   <div class="nodes">
-    <el-table :data="nodes" border style="width: 100%"
-    :row-class-name="tableRowClassName" @row-dblclick="select" @row-contextmenu="contextmenu">
+    <el-table :data="nodes" border style="width: 100%" :row-class-name="tableRowClassName" @row-dblclick="select" @row-contextmenu="contextmenu">
       <el-table-column prop="ip" label="ip" width="180">
       </el-table-column>
       <el-table-column prop="name" label="名称" width="180">
@@ -19,6 +18,7 @@
       <div class="menu" @click="contextClick('ping',$event)">ping</div>
       <div class="menu" @click="contextClick('tcping',$event)">tcp-ping</div>
       <div class="menu" @click="contextClick('night',$event)">设置为夜晚节点</div>
+      <div class="menu" @click="contextClick('share',$event)">分享节点</div>
     </div>
   </div>
 </template>
@@ -30,6 +30,7 @@
     _ping,
     _tcping
   } from '../utils/ping'
+  import Form from '../components/form.vue'
   export default {
     data() {
       return {
@@ -54,15 +55,18 @@
       })
     },
     methods: {
-       tableRowClassName({row, rowIndex}) {
+      tableRowClassName({
+        row,
+        rowIndex
+      }) {
         if (rowIndex === this.idx) return 'select-row';
         return '';
       },
       select(e, r, ele) {
-        this.nodes.forEach((v,i)=>{
-          if(v===e) this.idx=i 
+        this.nodes.forEach((v, i) => {
+          if (v === e) this.idx = i
         })
-        console.log('select node index:',this.idx)
+        console.log('select node index:', this.idx)
         let ipc = electron.ipcRenderer
         ipc.send('change-linkNode', e)
       },
@@ -78,27 +82,38 @@
       contextClick(type, e) {
         e.stopPropagation()
         let ipc = electron.ipcRenderer
-        let host = this.node,
-          self = this,
-          result
+        let node = this.node,self = this
         if (type === 'delete') {
-          ipc.send('delete-node', host.ip)
-        } else if (type === 'update') {} else if (type === 'tcping') {
-          _tcping(host, res => {
+          ipc.send('delete-node', node.ip)
+        } else if (type === 'update') {
+          const h=this.$createElement
+          this.$msgbox({
+            title: '修改节点信息',
+            message: h(Form,{props:{form:node}}),
+            showCancelButton: true,
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+          }).then(action=>{
+            ipc.send('update-node', self.nodes)
+          }).catch(e=>{})
+        } else if (type === 'tcping') {
+          _tcping(node, res => {
             let result = parseInt(res.avg) || parseInt(res.min) || -1
             self.nodes.forEach((v, i) => {
-              if (v === host) v.ping = result
+              if (v === node) v.ping = result
             })
           })
         } else if (type === 'ping') {
-          _tcping(host, res => {
+          _tcping(node, res => {
             let result = parseInt(res.avg) || parseInt(res.min) || -1
             self.nodes.forEach((v, i) => {
-              if (v === host) v.ping = result
+              if (v === node) v.ping = result
             })
           })
         } else if (type === 'night') {
-          ipc.send('change-nightNode', host)
+          ipc.send('change-nightNode', node)
+        }else if(type === 'share'){
+          console.log('share');
         }
         this.$refs.meun.style.height = '0'
       },
@@ -132,7 +147,7 @@
   #menu .menu:hover {
     background: #ccc;
   }
-   .el-table .select-row {
+  .el-table .select-row {
     background: rgb(172, 255, 208);
   }
 </style>
