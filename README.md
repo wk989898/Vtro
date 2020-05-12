@@ -9,7 +9,7 @@ trojan 的 windows 图形界面
 - 可以订阅和添加节点
 - ~~暂时无法更改节点选项,可以删除后再添加~~
 - 支持 ping,tcp-ping
-- 根据时间改变节点  
+- 根据时间改变节点 ( 适用于晚上自动更改连接节点,如果节点质量不好 [try it](https://github.com/wk989898/Vtro/releases/) )    
   `开始结束时间相同视为关闭 默认：'19:30'-'00:30',`
 - [Conf 配置](./extra-trojan/conf.json)
 
