@@ -7,6 +7,7 @@ trojan 的 windows 图形界面
 ## 注意
 
 - 可以订阅和添加节点
+- 默认[配置](extra-trojan/config.json) ssl验证为`false` 其它保持默认，如有需要请自行更改
 - ~~暂时无法更改节点选项,可以删除后再添加~~
 - 支持 ping,tcp-ping
 - 根据时间改变节点 ( 适用于晚上自动更改连接节点,如果节点质量不好 [try it](https://github.com/wk989898/Vtro/releases/) )    
@@ -49,9 +50,10 @@ cd dist
 ## Todo
 
 * [x] 更改单个节点
-* [ ] 分享节点
 * [x] 新的交互设计
+* [ ] 分享节点
 * [ ] 更改监听端口
+* [ ] 统计流量
 
 ## Credits
 
