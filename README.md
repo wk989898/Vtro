@@ -1,5 +1,5 @@
 # Vtro ![Vtro](./tray.ico)
-
+[![GitHub license](https://img.shields.io/github/license/wk989898/Vtro)](https://github.com/wk989898/Vtro/blob/master/LICENSE)
 ## 介绍
 
 trojan 的 windows 图形界面
@@ -19,9 +19,9 @@ trojan 的 windows 图形界面
 
 ### config
 
-- mode `string` default:`day`  
+- mode `string` default: `day`  
   &nbsp;&nbsp;`night | day`
-- proxy `string` default `pac`  
+- proxy `string` default: `pac`  
   &nbsp;&nbsp;`pac | global | off`  
   |type|host|port|
   |---|----|----|
@@ -30,10 +30,10 @@ trojan 的 windows 图形界面
   |socks5|-|1080|
   > 设置 off 后只会开启 socks5 端口 !
 - time `object`
-  - startTime default:`'17:30'`
-  - endTime default:`'00:30'`
-- day `node`
-- night `node`
+  - startTime default: `'17:30'`
+  - endTime default: `'00:30'`
+- day `node` 白天节点
+- night `node` 夜间节点
 
 ## 运行
 
