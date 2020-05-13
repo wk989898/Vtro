@@ -16,7 +16,7 @@
   export default {
     data() {
       return {
-        sub: '',
+        sub: null,
         subs: [],
         confirm: false
       }
@@ -37,7 +37,8 @@
     methods: {
       async update() {
         let ipc = electron.ipcRenderer
-        const list = Array.from(new Set(this.subs).add(this.sub))
+        const tem=this.sub?this.sub:this.subs[0]
+        const list = Array.from(new Set(this.subs).add(tem))
         console.time('axios')
         let nodes = [],
           i = 0,
@@ -59,7 +60,7 @@
           if (!this.confirm) this.confirm = true
         })
         console.timeEnd('axios')
-        nodes=this.$global.nodes = nodes.flat(Infinity)
+        nodes=this.$global.nodes = nodes.flat(Infinity).filter(v=>v!==null)
         ipc.send('update', {
           nodes,
           sub: list

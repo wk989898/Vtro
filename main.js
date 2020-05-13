@@ -9,6 +9,13 @@ const dns = require('dns')
 
 var win, tray, trojan, privo, privoxypid, trojanpid
 const server = http.createServer()
+const size = {
+  B: 1 << 0,
+  KB: 1 << 10,
+  MB: 1 << 20,
+  GB: 1 << 30
+}
+const unit = Object.keys(size)
 
 function createWindow() {
   win = new BrowserWindow({
@@ -84,18 +91,30 @@ app.on('activate', function () {
 })
 
 
-// 获取类型
+// utils
 function type(a) {
   return Object.prototype.toString.call(a).slice(8).replace(']', '').toLowerCase()
 }
 function _path(p) {
-  let Path=app.isPackaged?path.resolve(app.getPath('exe'),'../'):''
-  return path.resolve(Path,p)
+  let Path = app.isPackaged ? path.resolve(app.getPath('exe'), '../') : ''
+  return path.resolve(Path, p)
+}
+function formatTime(font = '-', mid = ' ', end = ':') {
+  const time = new Date()
+  const [year, month, day, hour, min, sec] =
+    [time.getFullYear().toString(),
+    time.getMonth().toString().padStart(2, 0),
+    time.getDay().toString().padStart(2, 0),
+    time.getHours().toString().padStart(2, 0),
+    time.getMinutes().toString().padStart(2, 0),
+    time.getSeconds().toString().padStart(2, 0)
+    ]
+  return `[${[year, month, day].join(font)}${mid}${[hour, min, sec].join(end)}] `
 }
 // 添加日志
 function appendLog(err, path) {
   if (path === null || path === undefined) path = _path('./trojan/log.txt')
-  fs.appendFile(path, err + '\n', 'utf-8', () => { })
+  fs.appendFile(path, formatTime() + err + '\n', 'utf-8', () => { })
 }
 // 设置pac代理
 server.on('request', (req, res) => {
@@ -123,7 +142,7 @@ function privoxy() {
     windowsHide: true
     // shell: true,
   }, (err) => {
-    let log = 'privoxy error!has you close privoxy?\nplease check http://localhost:1081'
+    let log = 'privoxy error!has you close privoxy?\nplease check http://localhost:1081\n'
     if (err) appendLog(log) && server.close()
   })
   privoxypid = privo.pid
@@ -137,7 +156,7 @@ function allquit() {
 // 添加文件
 async function addfile(name, chunk, cb) {
   if (!chunk) {
-    appendLog(`there is no chunk`)
+    appendLog(`there is no data to be added`)
     return Promise.resolve(false)
   }
   await openConf('a', null, res => {
@@ -204,7 +223,32 @@ function changeConfig(e) {
     })
   })
 }
+// 流量统计
+function flow(trojan = trojan) {
+  let received = 0, sent = 0
+  trojan.stderr.on('data', data => {
+    data.replace(/(\d*) bytes received, (\d*) bytes sent/, (e, $1, $2) => {
+      // $1 && console.log('received:', convert($1))
+      // $2 && console.log('sent:',convert($2))
+      if ($1 && $2) {
+        received += Number($1)
+        sent += Number($2)
+      }
+    })
+  }).on('close', () => {
+    console.log('close', convert(received), convert(sent))
+  })
+}
 
+function convert(data = 0) {
+  data = Math.abs(data)
+  for (let i of unit) {
+    if (data < 1024 * size[i]) {
+      return (data / size[i]).toFixed(2) + i
+    }
+  }
+  return (data / size['GB']).toFixed(2) + i
+}
 /** 监听事件 */
 
 // 连接 关闭
@@ -215,10 +259,11 @@ ipcMain.on('link', (e, type) => {
     cwd: _path('./trojan'),
     windowsHide: true
   }, (err, stdout, stderr) => {
-    if (err) appendLog(stderr, _path('./trojan/trojan-log.txt'))
-    if (stdout) appendLog(stdout, _path('./trojan/trojan-log.txt'))
+    if (stderr) appendLog(stderr, _path('./trojan/trojan-log.txt'))
   })
+  flow(trojan)
   trojanpid = trojan.pid
+
   let arg
   openConf('r', null, res => {
     type = type ? type : (res.config.proxy || 'pac')
@@ -305,9 +350,9 @@ ipcMain.on('add-node', (e, node) => {
     return v.addr !== v.addr
   })
   e.reply('deleted')
-}).on('update-node',(e,nodes)=>{
-  openConf('a',null,res=>{
-    res.nodes=nodes
+}).on('update-node', (e, nodes) => {
+  openConf('a', null, res => {
+    res.nodes = nodes
   })
 })
 
