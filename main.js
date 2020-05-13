@@ -113,6 +113,7 @@ function formatTime(font = '-', mid = ' ', end = ':') {
 }
 // 添加日志
 function appendLog(err, path) {
+  if (!err) return;
   if (path === null || path === undefined) path = _path('./trojan/log.txt')
   fs.appendFile(path, formatTime() + err + '\n', 'utf-8', () => { })
 }
@@ -338,23 +339,25 @@ ipcMain.on('get-sub', e => {
 
 // 手动添加节点 删除节点  更改节点配置
 ipcMain.on('add-node', (e, node) => {
-  dns.resolve4(node.addr, (err, addresses) => {
-    if (err) node.ip = '0';
-    type(addresses) === 'array' && (addresses = (addresses[0]))
-    node.ip = addresses
-    addfile('nodes', node)
-  })
+  if (!node.ip)
+    dns.resolve4(node.addr, (err, addresses) => {
+      if (err) node.ip = '0';
+      type(addresses) === 'array' && (addresses = (addresses[0]))
+      node.ip = addresses
+      addfile('nodes', node)
+    })
+  else addfile('nodes', node)
 }).on('delete-node', (e, ip) => {
-  deleteData('nodes', v => {
-    if (v.ip) return v.ip !== ip
-    return v.addr !== v.addr
+    deleteData('nodes', v => {
+      if (v.ip) return v.ip !== ip
+      return v.addr !== v.addr
+    })
+    e.reply('deleted')
+  }).on('update-node', (e, nodes) => {
+    openConf('a', null, res => {
+      res.nodes = nodes
+    })
   })
-  e.reply('deleted')
-}).on('update-node', (e, nodes) => {
-  openConf('a', null, res => {
-    res.nodes = nodes
-  })
-})
 
 // config 设置     
 ipcMain.on('getConf', e => {

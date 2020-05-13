@@ -28,7 +28,7 @@
 </template>
 
 <script>
-  import Trojan from '../../trojan/trojan'
+  import Trojan from '../utils/trojan'
   export default {
     data() {
       return {
@@ -65,6 +65,9 @@
       addnode(data) {
         let ipc = electron.ipcRenderer
         ipc.send('add-node', data)
+        setTimeout(() => {
+          ipc.send('get-nodes')
+        }, 1000);
         this.$router.push('/')
       }
     }

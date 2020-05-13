@@ -30,6 +30,7 @@
     _ping,
     _tcping
   } from '../utils/ping'
+  import Trojan from '../utils/trojan'
   import Form from '../components/form.vue'
   export default {
     data() {
@@ -82,20 +83,25 @@
       contextClick(type, e) {
         e.stopPropagation()
         let ipc = electron.ipcRenderer
-        let node = this.node,self = this
+        let node = this.node,
+          self = this
         if (type === 'delete') {
           ipc.send('delete-node', node.ip)
         } else if (type === 'update') {
-          const h=this.$createElement
+          const h = this.$createElement
           this.$msgbox({
             title: '修改节点信息',
-            message: h(Form,{props:{form:node}}),
+            message: h(Form, {
+              props: {
+                form: node
+              }
+            }),
             showCancelButton: true,
             confirmButtonText: '确定',
             cancelButtonText: '取消',
-          }).then(action=>{
+          }).then(action => {
             ipc.send('update-node', self.nodes)
-          }).catch(e=>{})
+          }).catch(e => {})
         } else if (type === 'tcping') {
           _tcping(node, res => {
             let result = parseInt(res.avg) || parseInt(res.min) || -1
@@ -112,8 +118,21 @@
           })
         } else if (type === 'night') {
           ipc.send('change-nightNode', node)
-        }else if(type === 'share'){
-          console.log('share');
+        } else if (type === 'share') {
+          navigator.clipboard.writeText(Trojan.share(node)).then(() =>
+            this.$notify({
+              title: '成功',
+              message: '复制成功',
+              type: 'success',
+              duration:1000,
+              showClose: false
+            })
+          ).catch(()=>this.$notify.error({
+              title: '失败',
+              message: '复制失败',
+              duration:1000,
+              showClose: false
+            }))
         }
         this.$refs.meun.style.height = '0'
       },

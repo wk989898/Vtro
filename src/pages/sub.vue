@@ -12,7 +12,7 @@
 </template>
 
 <script>
-  import Trojan from '../../trojan/trojan'
+  import Trojan from '../utils/trojan'
   export default {
     data() {
       return {
