@@ -229,8 +229,6 @@ function flow(trojan = trojan) {
   let received = 0, sent = 0
   trojan.stderr.on('data', data => {
     data.replace(/(\d*) bytes received, (\d*) bytes sent/, (e, $1, $2) => {
-      // $1 && console.log('received:', convert($1))
-      // $2 && console.log('sent:',convert($2))
       if ($1 && $2) {
         received += Number($1)
         sent += Number($2)
