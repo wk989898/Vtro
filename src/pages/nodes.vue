@@ -46,7 +46,10 @@
       ipc.on('update-nodes', (e, arg) => {
         console.log('update-nodes')
         this.nodes = this.$global.nodes = arg
-        this.$forceUpdate()
+        if (!this.nodes[0].ping) this.nodes.forEach(v => {
+          this.$set(v, 'ping', 0)
+        })
+        // this.$forceUpdate()
       }).on('ping', e => {
         makeping(this.nodes)
       }).on('tcp-ping', e => {
@@ -110,7 +113,7 @@
             })
           })
         } else if (type === 'ping') {
-          _tcping(node, res => {
+          _ping(node, res => {
             let result = parseInt(res.avg) || parseInt(res.min) || -1
             self.nodes.forEach((v, i) => {
               if (v === node) v.ping = result
@@ -124,15 +127,15 @@
               title: '成功',
               message: '复制成功',
               type: 'success',
-              duration:1000,
+              duration: 1000,
               showClose: false
             })
-          ).catch(()=>this.$notify.error({
-              title: '失败',
-              message: '复制失败',
-              duration:1000,
-              showClose: false
-            }))
+          ).catch(() => this.$notify.error({
+            title: '失败',
+            message: '复制失败',
+            duration: 1000,
+            showClose: false
+          }))
         }
         this.$refs.meun.style.height = '0'
       },

@@ -31,6 +31,7 @@ export function getTcping(hosts) {
   })
 }
  */
+
 export function _ping(host, cb) {
   ping.promise.probe(host.addr, {
     timeout: 10
@@ -44,18 +45,18 @@ export function _tcping(host, cb) {
   }).then(cb)
 }
 export function makeping(lists) {
-  lists.map(list => {
-    list.ping = 'wait'
+  lists.forEach(list => {
+    // list.ping = 'wait'
     _ping(list, res => {
-      list.ping = parseInt(res.avg) || parseInt(res.min) || -1
+      list.ping = parseInt(res.avg) || parseInt(res.min) || 'fail'
     })
   })
 }
 export function maketcping(lists) {
-  lists.map(list => {
+  lists.forEach(list => {
     list.ping = 'wait'
     _tcping(list, res => {
-      list.ping = parseInt(res.avg) || parseInt(res.min) || -1
+      list.ping = parseInt(res.avg) || parseInt(res.min) || 'fail'
     })
   })
 }

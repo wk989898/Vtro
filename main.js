@@ -319,6 +319,7 @@ ipcMain.on('get-sub', e => {
   })
 }).on('update', (e, r) => {
   addfile('nodes', r.nodes, res => {
+    // clear nodes
     res.nodes.length = 0
   }).finally(e => {
     // 防止写入数据出错

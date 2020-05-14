@@ -22,9 +22,7 @@ class Trojan {
     json.allow = arr[3]
     json.addr = arr[4]
     json.name = decodeURI(arr[5])
-    // 必须存在 否则会影响 nodes.ping 刷新 
-    // 可能是vue的bug
-    json.ping = 0
+    // json.ping = 0
     return json
   }
   subscribe(txt) {
