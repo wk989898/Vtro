@@ -9,7 +9,7 @@ trojan 的 windows 图形界面
 ## 注意
 
 - 可以订阅和添加节点,更新订阅时会删除原有所有节点
-- 默认[配置](extra-trojan/config.json) ssl 验证为`false` 其它保持默认，如有需要请自行更改
+- 默认[配置](extra-trojan/config.json) ssl 验证为`false` 其它保持默认，如有需要请自行更改[conf.json](#conf-配置)
 - ~~暂时无法更改节点选项,可以删除后再添加~~
 - 支持 ping,tcp-ping
 
@@ -19,7 +19,7 @@ trojan 的 windows 图形界面
 
 `开始结束时间相同视为关闭 默认：'19:30'-'00:30',`
 
-## [Conf 配置](./extra-trojan/conf.json)
+## Conf [配置](./extra-trojan/conf.json) 
 
 - nodes `array<node>` 节点列表
 - sub `array` 订阅组
@@ -64,3 +64,4 @@ cd dist
 [trojan](https://github.com/trojan-gfw/trojan)  
 [privoxy](https://www.privoxy.org/)  
 [v2rayN](https://github.com/2dust/v2rayN)
+[QRCode](https://github.com/davidshimjs/qrcodejs)

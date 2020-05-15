@@ -32,6 +32,7 @@
   } from '../utils/ping'
   import Trojan from '../utils/trojan'
   import Form from '../components/form.vue'
+  import QRcode from "../components/QRcode.vue";
   export default {
     data() {
       return {
@@ -122,20 +123,17 @@
         } else if (type === 'night') {
           ipc.send('change-nightNode', node)
         } else if (type === 'share') {
-          navigator.clipboard.writeText(Trojan.share(node)).then(() =>
-            this.$notify({
-              title: '成功',
-              message: '复制成功',
-              type: 'success',
-              duration: 1000,
-              showClose: false
-            })
-          ).catch(() => this.$notify.error({
-            title: '失败',
-            message: '复制失败',
-            duration: 1000,
-            showClose: false
-          }))
+          let trojan = Trojan.share(node)
+          const h = this.$createElement
+          this.$msgbox({
+              title: '分享节点',
+              message: h(QRcode, {
+                props: {
+                  trojan
+                }
+              })
+            }).then(() => this.$message('已经复制到粘贴板~'))
+            .catch(() => this.$message('已经复制到粘贴板~'))
         }
         this.$refs.meun.style.height = '0'
       },
