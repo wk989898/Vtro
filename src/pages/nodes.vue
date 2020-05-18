@@ -132,8 +132,8 @@
                   trojan
                 }
               })
-            }).then(() => this.$message('已经复制到粘贴板~'))
-            .catch(() => this.$message('已经复制到粘贴板~'))
+            })
+            .finally(() => this.$message('已经复制到粘贴板~'))
         }
         this.$refs.meun.style.height = '0'
       },

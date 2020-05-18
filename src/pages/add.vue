@@ -29,6 +29,7 @@
 
 <script>
   import Trojan from '../utils/trojan'
+  import {Now} from '../utils/time'
   export default {
     data() {
       return {
@@ -68,7 +69,13 @@
         setTimeout(() => {
           ipc.send('get-nodes')
         }, 1000);
-        this.$router.push('/')
+        this.$notify({
+          title: '节点添加',
+          message: `添加节点成功\n${Now()}`,
+          type: 'success',
+          duration: 1500,
+          showClose: false
+        });
       }
     }
   }
@@ -77,5 +84,6 @@
   textarea {
     width: 35%;
     height: 20%;
+    min-height: 40px;
   }
 </style>

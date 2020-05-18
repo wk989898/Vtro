@@ -1,24 +1,26 @@
 <template>
   <div>
     <div v-for="(item,index) in subs" :key="index" class="subs">
-      {{item}}
-      <el-button type="danger" @click="remove(index)" icon="el-icon-delete" circle></el-button>
+      <input type="text" :value="item" @blur="subs[index]=$event.target.value"/>
+      <el-button type="danger" @click="remove(index)" icon="el-icon-delete" circle title="删除"/>
     </div>
     <br/>
-    <el-input placeholder="输入订阅地址" v-model="sub" clearable />
-    <el-button plain @click="update">更新订阅</el-button>
-    <div v-show="confirm">无效的地址~~</div>
+    <el-input class="sub" placeholder="输入订阅地址" v-model="sub" clearable />
+    <el-button plain type="success" @click="update">更新订阅</el-button>
+    <div>{{confirm}}</div>
   </div>
 </template>
 
 <script>
   import Trojan from '../utils/trojan'
+  import {Now} from '../utils/time'
   export default {
     data() {
       return {
+        test:1,
         sub: null,
         subs: [],
-        confirm: false
+        confirm: '点击订阅可以修改~'
       }
     },
     activated() {
@@ -37,8 +39,12 @@
     methods: {
       async update() {
         let ipc = electron.ipcRenderer
-        const tem=this.sub?this.sub:this.subs[0]
-        const list = Array.from(new Set(this.subs).add(tem))
+        this.confirm=''
+        const temp=this.sub?this.sub:this.subs[0]
+        if(!temp) {
+          return this.$message("请输入订阅！");
+        }
+        const list = Array.from(new Set(this.subs).add(temp))
         console.time('axios')
         let nodes = [],
           i = 0,
@@ -57,7 +63,7 @@
           nodes.push(Trojan.subscribe(res.data))
         }).catch(e => {
           console.log(e)
-          if (!this.confirm) this.confirm = true
+          this.confirm+=`can't get subscribe from ${list[i]}\n`
         })
         console.timeEnd('axios')
         nodes=this.$global.nodes = nodes.flat(Infinity).filter(v=>v!==null)
@@ -68,31 +74,52 @@
         setTimeout(() => {
           ipc.send('get-nodes')
         }, 1000);
-        this.confirm = false
-        this.$router.push('/')
+        this.$notify({
+          title: '订阅',
+          message: `订阅已更新\n${Now()}`,
+          type: 'success',
+          duration: 1500,
+          showClose: false
+        });
       },
       remove(i) {
         let ipc = electron.ipcRenderer
-        console.log(this.subs[i])
+        console.log('will remove:',this.subs[i])
         ipc.send('remove-sub', this.subs[i])
       }
     }
   }
 </script>
 <style scoped>
-  input {
+  .sub {
     height: 50%;
     width: 70%;
     display: block;
+    margin-bottom: 10px;
   }
   .subs {
     padding: 3px 10px;
-    border: 1px solid #eee;
-    border-bottom: 0;
-    background-color: #ccc;
+    border-radius: 5px;
+    background-color: #eee;
+    margin-right: 15px;
+  }
+  .subs::after{
+    content: '';
+    clear: both;
+    display: table;
+  }
+  .subs>input {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    width: 80%;
+    border: none;
+    word-wrap: break-word;
+    font-size: 18px;
+    outline: none;
     cursor: default;
   }
-  .subs button {
-    margin-left: 80px;
+  .subs>button {
+    margin:0 5%;
   }
 </style>

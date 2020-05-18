@@ -63,5 +63,5 @@ cd dist
 
 [trojan](https://github.com/trojan-gfw/trojan)  
 [privoxy](https://www.privoxy.org/)  
-[v2rayN](https://github.com/2dust/v2rayN)
+[v2rayN](https://github.com/2dust/v2rayN)  
 [QRCode](https://github.com/davidshimjs/qrcodejs)
