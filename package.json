@@ -54,12 +54,10 @@
   "author": "wk989898",
   "license": "ISC",
   "devDependencies": {
-    "axios": "^0.19.2",
     "css-loader": "^3.5.1",
     "electron": "^8.0.0",
     "electron-builder": "^22.4.1",
     "element-ui": "^2.13.0",
-    "file-loader": "^6.0.0",
     "rollup": "^2.6.1",
     "rollup-plugin-banner": "^0.2.1",
     "rollup-plugin-terser": "^5.3.0",

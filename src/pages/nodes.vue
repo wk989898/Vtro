@@ -46,7 +46,7 @@
       ipc.send('get-nodes')
       ipc.on('update-nodes', (e, arg) => {
         console.log('update-nodes')
-        this.nodes = this.$global.nodes = arg
+        this.nodes = arg
         if (!this.nodes[0].ping) this.nodes.forEach(v => {
           this.$set(v, 'ping', 0)
         })
