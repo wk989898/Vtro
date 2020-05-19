@@ -4,6 +4,7 @@
   "config":{
     "mode":"day",
     "proxy":"pac",
+    "listen":[1080,1081,1082],
     "time":{
       "startTime":"19:30",
       "endTime":"00:30"

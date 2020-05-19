@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-tabs :tab-position="tabPosition" style="height: 200px;">
+    <el-tabs :tab-position="tabPosition">
       <el-tab-pane label="代理设置">
         <el-radio v-model="proxy" label="global">全局代理</el-radio>
         <el-radio v-model="proxy" label="pac">pac</el-radio>
@@ -18,6 +18,15 @@
         <label>开机启动：</label>
         <el-switch v-model="login" active-color="#13ce66" inactive-color="#ff4949" @change="changeLogin" />
         <p>可能会不生效~</p>
+      </el-tab-pane>
+      <el-tab-pane label="监听端口" class="listen">
+        <label for="socks">socks:</label>
+        <el-input v-model="listen[0]" name="socks" />
+        <label for="http">http:</label>
+        <el-input v-model="listen[1]" name="http" />
+        <label for="_pac">pac:</label>
+        <el-input v-model="listen[2]" name="_pac" />
+        <el-button @click="portReset">更改</el-button>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -41,7 +50,8 @@
         endTime: null,
         night: null,
         pid1: null,
-        pid2: null
+        pid2: null,
+        listen: []
       }
     },
     mounted() {
@@ -56,12 +66,14 @@
             startTime,
             endTime
           },
+          listen
         } = conf
         this.proxy = proxy
         this.startTime = startTime
         this.endTime = endTime
         this.night = night
         this.mode = mode
+        this.listen = listen
       }).on('login', (e, login) => {
         this.login = login
       }).on('mode', () => {
@@ -76,7 +88,7 @@
       }, 1000)
     },
     watch: {
-      'proxy': function(newval, old) {
+      proxy: function(newval, old) {
         if (!old) return;
         let ipc = electron.ipcRenderer
         ipc.send('setConf', {
@@ -134,10 +146,37 @@
         this.$global.pid1 = this.timer('night', night * 1000)
         this.$global.pid2 = this.timer('day', last * 1000)
         return true
+      },
+      portReset() {
+        let ipc = electron.ipcRenderer
+        const max = 1 << 16
+        let isPort=false
+        const listen = this.listen.map((v, i) => {
+          v = Number(v)
+          if (v >= max || v <= 0) {
+            this.$message('无效的端口')
+            isPort=true
+            return [1080, 1081, 1082][i]
+          }
+          return v
+        })
+        if(isPort) return ;
+        ipc.send('setConf', {
+          listen
+        })
+        if (this.$global.link) setTimeout(() => {
+          ipc.send('link')
+        }, 1000)
       }
     }
   }
 </script>
-<style>
-
+<style scoped>
+  .listen {
+    font-size: 14px;
+    margin: 0 0 30px 10px;
+  }
+  .listen button {
+    margin-top: 3px;
+  }
 </style>

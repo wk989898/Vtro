@@ -12,6 +12,7 @@ trojan 的 windows 图形界面
 - 默认[配置](extra-trojan/config.json) ssl 验证为`false` 其它保持默认，如有需要请自行更改[conf.json](#conf-配置)
 - ~~暂时无法更改节点选项,可以删除后再添加~~
 - 支持 ping,tcp-ping
+- 建议搭配[SwitchyOmega](https://github.com/FelisCatus/SwitchyOmega)使用
 
 ## Feature
 
@@ -34,6 +35,7 @@ trojan 的 windows 图形界面
     |http|-|1081|
     |socks5|-|1080|
     > 设置 off 后只会开启 socks5 端口 !
+  - listen `array` default: `[1080,1081,1082]` 监听端口
   - time `object`
   - startTime default: `'19:30'`
   - endTime default: `'00:30'`
@@ -56,8 +58,9 @@ cd dist
 - [x] 更改单个节点
 - [x] 新的交互设计
 - [x] 分享节点
-- [ ] 更改监听端口
+- [x] 更改监听端口
 - [ ] 统计流量
+- [ ] 更新pac
 
 ## Credits
 

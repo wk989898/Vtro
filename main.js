@@ -206,7 +206,7 @@ async function openConf(type, data = '', cb) {
   }
 }
 // 更改 config.json
-function changeConfig(e) {
+function changeConfig() {
   fs.readFile(_path('./trojan/config.json'), 'utf-8', (err, res) => {
     if (err) appendLog(err)
     let data = JSON.parse(res.toString())
@@ -218,6 +218,8 @@ function changeConfig(e) {
       data.remote_addr = now.addr
       data.remote_port = now.port
       data.password[0] = now.password
+      // socks5 port
+      data.local_port=res.config.listen[0]||1080
       await fs.writeFile(_path('./trojan/config.json'), JSON.stringify(data), 'utf-8', err => {
         if (err) appendLog(err)
       })
@@ -253,7 +255,7 @@ function convert(data = 0) {
 // 连接 关闭
 ipcMain.on('link', (e, type) => {
   allquit()
-  changeConfig(e)
+  changeConfig()
   trojan = cp.execFile('trojan.exe', {
     cwd: _path('./trojan'),
     windowsHide: true
@@ -265,16 +267,17 @@ ipcMain.on('link', (e, type) => {
 
   let arg
   openConf('r', null, res => {
-    type = type ? type : (res.config.proxy || 'pac')
+    const type=res.config.proxy||'pac'
+    const [p1,p2=1081,p3=1082]=res.config.listen
     if (type === 'global') {
-      arg = `http://127.0.0.1:1081`
+      arg = `http://127.0.0.1:${p2}`
       let list = `localhost;127.*`
       makeproxy(type, arg, list)
       privoxy()
     } else if (type === 'pac') {
-      // 默认
-      arg = `http://127.0.0.1:1082/pac`
-      !server.listening && server.listen(1082, '127.0.0.1', () => {
+      // default
+      arg = `http://127.0.0.1:${p3}/pac`
+      !server.listening && server.listen(p3, '127.0.0.1', () => {
         makeproxy(type, arg)
         privoxy()
       })
