@@ -20,7 +20,7 @@ trojan 的 windows 图形界面
 
 `开始结束时间相同视为关闭 默认：'19:30'-'00:30',`
 
-## Conf [配置](./extra-trojan/conf.json) 
+## Conf [配置](./extra-trojan/conf.json)
 
 - nodes `array<node>` 节点列表
 - sub `array` 订阅组

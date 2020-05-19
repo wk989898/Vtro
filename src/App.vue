@@ -40,9 +40,9 @@
     mounted() {
       let ipc = electron.ipcRenderer
       // test
-      ipc.on('test', (e, r) => {
-        console.log(r)
-      })
+      // ipc.on('test', (e, r) => {
+      //   console.log(r)
+      // })
       //
       let o = {
         sub: '订阅',

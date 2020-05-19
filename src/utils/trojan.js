@@ -1,8 +1,8 @@
 /**
- * trojan://B1nBOZ
- * @154.17.12.85:443
- * ?allowInsecure=1&peer=usd85.ovod.me
- * #%E5%B9%B4%E8%B4%B9%C2%B7T%C2%B7%E7%BE%8E%E5%9B%BDDA%C2%B7%E9%AB%98%E9%80%9F%C2%B785%C2%B7NetflixHBO
+ * trojan://password
+ * @ip:port
+ * ?allowInsecure=1&peer=addr
+ * #Name_NetflixHBO
  */
 
 class Trojan {
