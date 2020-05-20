@@ -13,7 +13,8 @@
         </keep-alive>
       </el-collapse-item>
     </el-collapse>
-    <back/>
+    <back />
+    <flow />
   </div>
 </template>
 
@@ -21,6 +22,7 @@
   import links from './pages/links'
   import nodes from './pages/nodes'
   import back from './components/back'
+  import flow from './components/flow'
   export default {
     name: 'App',
     data() {
@@ -32,7 +34,8 @@
     components: {
       links,
       back,
-      nodes
+      nodes,
+      flow
     },
     created() {
       this.$router.push(`/`)

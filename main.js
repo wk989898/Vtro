@@ -9,13 +9,7 @@ const dns = require('dns')
 
 var win, tray, trojan, privo, privoxypid, trojanpid
 const server = http.createServer()
-const size = {
-  B: 1 << 0,
-  KB: 1 << 10,
-  MB: 1 << 20,
-  GB: 1 << 30
-}
-const unit = Object.keys(size)
+
 
 function createWindow() {
   win = new BrowserWindow({
@@ -99,17 +93,16 @@ function _path(p) {
   let Path = app.isPackaged ? path.resolve(app.getPath('exe'), '../') : ''
   return path.resolve(Path, p)
 }
-function formatTime(font = '-', mid = ' ', end = ':') {
-  const time = new Date()
-  const [year, month, day, hour, min, sec] =
-    [time.getFullYear().toString(),
-    time.getMonth().toString().padStart(2, 0),
-    time.getDay().toString().padStart(2, 0),
-    time.getHours().toString().padStart(2, 0),
-    time.getMinutes().toString().padStart(2, 0),
-    time.getSeconds().toString().padStart(2, 0)
-    ]
-  return `[${[year, month, day].join(font)}${mid}${[hour, min, sec].join(end)}] `
+function formatTime() {
+  const [a = '-', b = ' ', c = ':']=[...arguments]
+  const now = new Date()
+  return now.getFullYear().toString() + a +
+    now.getMonth().toString().padStart(2, '0') + a +
+    now.getDay().toString().padStart(2, '0')
+    + b +
+    now.getHours().toString().padStart(2, '0') + c +
+    now.getMinutes().toString().padStart(2, '0') + c +
+    now.getSeconds().toString().padStart(2, '0')
 }
 // 添加日志
 function appendLog(err, path) {
@@ -219,7 +212,7 @@ function changeConfig() {
       data.remote_port = now.port
       data.password[0] = now.password
       // socks5 port
-      data.local_port=res.config.listen[0]||1080
+      data.local_port = res.config.listen[0] || 1080
       await fs.writeFile(_path('./trojan/config.json'), JSON.stringify(data), 'utf-8', err => {
         if (err) appendLog(err)
       })
@@ -227,29 +220,31 @@ function changeConfig() {
   })
 }
 // 流量统计
+let received = 0, sent = 0
 function flow(trojan = trojan) {
-  let received = 0, sent = 0
   trojan.stderr.on('data', data => {
     data.replace(/(\d*) bytes received, (\d*) bytes sent/, (e, $1, $2) => {
       if ($1 && $2) {
         received += Number($1)
         sent += Number($2)
+        send('flow', [received, sent])
       }
     })
   }).on('close', () => {
-    console.log('close', convert(received), convert(sent))
+    received = 0;
+    sent = 0
   })
 }
-
 function convert(data = 0) {
   data = Math.abs(data)
-  for (let i of unit) {
+  for (let i of flow_unit) {
     if (data < 1024 * size[i]) {
       return (data / size[i]).toFixed(2) + i
     }
   }
-  return (data / size['GB']).toFixed(2) + i
+  return (data / size['GB']).toFixed(2) + 'GB'
 }
+
 /** 监听事件 */
 
 // 连接 关闭
@@ -267,8 +262,8 @@ ipcMain.on('link', (e, type) => {
 
   let arg
   openConf('r', null, res => {
-    const type=res.config.proxy||'pac'
-    const [p1,p2=1081,p3=1082]=res.config.listen
+    const type = res.config.proxy || 'pac'
+    const [p1, p2 = 1081, p3 = 1082] = res.config.listen
     if (type === 'global') {
       arg = `http://127.0.0.1:${p2}`
       let list = `localhost;127.*`
@@ -350,16 +345,16 @@ ipcMain.on('add-node', (e, node) => {
     })
   else addfile('nodes', node)
 }).on('delete-node', (e, ip) => {
-    deleteData('nodes', v => {
-      if (v.ip) return v.ip !== ip
-      return v.addr !== v.addr
-    })
-    e.reply('deleted')
-  }).on('update-node', (e, nodes) => {
-    openConf('a', null, res => {
-      res.nodes = nodes
-    })
+  deleteData('nodes', v => {
+    if (v.ip) return v.ip !== ip
+    return v.addr !== v.addr
   })
+  e.reply('deleted')
+}).on('update-node', (e, nodes) => {
+  openConf('a', null, res => {
+    res.nodes = nodes
+  })
+})
 
 // config 设置     
 ipcMain.on('getConf', e => {

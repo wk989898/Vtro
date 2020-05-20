@@ -9,9 +9,9 @@ trojan 的 windows 图形界面
 ## 注意
 
 - 可以订阅和添加节点,更新订阅时会删除原有所有节点
-- 默认[配置](extra-trojan/config.json) ssl 验证为`false` 其它保持默认，如有需要请自行更改[conf.json](#conf-配置)
-- ~~暂时无法更改节点选项,可以删除后再添加~~
+- 默认[配置](extra-trojan/config.json) ssl 验证为`false` 其它保持默认，如有需要请自行更改  
 - 支持 ping,tcp-ping
+- 流量统计由trojan输出数据得出
 - 建议搭配[SwitchyOmega](https://github.com/FelisCatus/SwitchyOmega)使用
 
 ## Feature
@@ -56,10 +56,10 @@ cd dist
 ## Todo
 
 - [x] 更改单个节点
-- [x] 新的交互设计
+- [x] 新的交互设计 (更加新的交互设计🙄)
 - [x] 分享节点
 - [x] 更改监听端口
-- [ ] 统计流量
+- [x] 统计流量  
 - [ ] 更新pac
 
 ## Credits
