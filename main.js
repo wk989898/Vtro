@@ -1,3 +1,4 @@
+"use strict";
 const { app, BrowserWindow, ipcMain, Menu, Tray, shell } = require('electron')
 const path = require('path')
 const fs = require('fs')
@@ -93,8 +94,8 @@ function _path(p) {
   let Path = app.isPackaged ? path.resolve(app.getPath('exe'), '../') : ''
   return path.resolve(Path, p)
 }
-function formatTime() {
-  const [a = '-', b = ' ', c = ':']=[...arguments]
+function formatTime(...args) {
+  const [a = '-', b = ' ', c = ':']=args
   const now = new Date()
   return now.getFullYear().toString() + a +
     now.getMonth().toString().padStart(2, '0') + a +
@@ -107,7 +108,7 @@ function formatTime() {
 // 添加日志
 function appendLog(err, path) {
   if (!err) return;
-  if (path === null || path === undefined) path = _path('./trojan/log.txt')
+  if (path === null || path === void 0) path = _path('./trojan/log.txt')
   fs.appendFile(path, formatTime() + err + '\n', 'utf-8', () => { })
 }
 // 设置pac代理

@@ -29,7 +29,9 @@
 
 <script>
   import Trojan from '../utils/trojan'
-  import {Now} from '../utils/time'
+  import {
+    Now
+  } from '../utils/time'
   export default {
     data() {
       return {
@@ -66,6 +68,13 @@
       addnode(data) {
         let ipc = electron.ipcRenderer
         ipc.send('add-node', data)
+        this.tro = ''
+        this.form = {
+          addr: '',
+          port: 443,
+          password: '',
+          name: ''
+        }
         setTimeout(() => {
           ipc.send('get-nodes')
         }, 1000);

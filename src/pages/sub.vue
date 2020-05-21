@@ -52,19 +52,28 @@
           i = 0,
           j = list.length
         for (; i < j; i++)
-        await fetch(list[i]).then(e=>e.text()).then(res => {
-          nodes.push(Trojan.subscribe(res))
-        }).catch(e => {
-          console.log(e)
-          if (list[i])
-            this.confirm += `can't get subscribe from ${list[i]}\n`
-        })
+          await fetch(list[i]).then(e => e.text()).then(res => {
+            nodes.push(Trojan.subscribe(res))
+          }).catch(e => {
+            console.log(e)
+            if (list[i])
+              this.confirm += `can't get subscribe from ${list[i]}\n`
+          })
         console.timeEnd('fetch')
         nodes = nodes.flat(Infinity).filter(v => v !== null)
+        if (nodes.length === 0)
+          return this.$notify({
+            title: '订阅',
+            message: `订阅未成功\n请检查您的网络`,
+            type: 'warning',
+            duration: 1500,
+            showClose: false
+          });
         ipc.send('update', {
           nodes,
           sub: list
         })
+        this.sub = ''
         setTimeout(() => {
           ipc.send('get-nodes')
         }, 1000);

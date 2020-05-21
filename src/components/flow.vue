@@ -36,5 +36,6 @@
   color: white;
   border-radius: 2px;
   padding: 2px 5px;
+  opacity: .8;
 }
 </style>

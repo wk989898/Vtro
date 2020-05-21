@@ -29,8 +29,8 @@ export function calcTime({ startTime, endTime }) {
 /**
  * @returns {string}   e.g. y-m-d h-m-s
  */
-export function Now() {
-  const [a = '/', b = ' ', c = '-'] = [...arguments]
+export function Now(...args) {
+  const [a = '/', b = ' ', c = '-'] = args
   const now = new Date()
   return now.getFullYear().toString() + a +
     now.getMonth().toString().padStart(2, '0') + a +
