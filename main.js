@@ -11,7 +11,6 @@ const dns = require('dns')
 var win, tray, trojan, privo, privoxypid, trojanpid
 const server = http.createServer()
 
-
 function createWindow() {
   win = new BrowserWindow({
     width: 800,
@@ -28,10 +27,10 @@ function createWindow() {
     win.hide()
   })
 }
-
 app.name = "Vtro"
 // 应用锁
 const Lock = app.requestSingleInstanceLock()
+
 if (!Lock) {
   app.quit()
 } else {
@@ -95,7 +94,7 @@ function _path(p) {
   return path.resolve(Path, p)
 }
 function formatTime(...args) {
-  const [a = '-', b = ' ', c = ':']=args
+  const [a = '-', b = ' ', c = ':'] = args
   const now = new Date()
   return now.getFullYear().toString() + a +
     now.getMonth().toString().padStart(2, '0') + a +
@@ -311,7 +310,7 @@ ipcMain.on('get-nodes', e => {
     e.reply('mode')
   })
 })
-// 获取订阅 更新订阅 删除订阅
+// 获取订阅 更新订阅 删除订阅 set-proxy
 ipcMain.on('get-sub', e => {
   openConf('r', null, res => {
     e.reply('subs', res.sub || [])
@@ -333,6 +332,10 @@ ipcMain.on('get-sub', e => {
     return v !== sub
   })
   e.reply('removed')
+}).on('sub-proxy', (e, list) => {
+  // let socks5 = `socks5://127.0.0.1:1080`
+  // win.webContents.session.setProxy({ proxyRules: socks5 })
+  // else win.webContents.session.setProxy({})
 })
 
 // 手动添加节点 删除节点  更改节点配置
@@ -384,7 +387,9 @@ ipcMain.on('set-login', (e, login) => {
 }).on('get-login', e => {
   e.reply('login', app.getLoginItemSettings().openAtLogin)
 })
-
+ipcMain.on('test', e => {
+  e.reply('test-replay', 'test')
+})
 // 菜单
 var template = [
   {

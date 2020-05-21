@@ -39,14 +39,13 @@
     },
     created() {
       this.$router.push(`/`)
+      // test
+      ipc.send('test')
+      ipc.on('test-replay', (e, r) => {
+        console.log(r)
+      })
     },
     mounted() {
-      let ipc = electron.ipcRenderer
-      // test
-      // ipc.on('test', (e, r) => {
-      //   console.log(r)
-      // })
-      //
       let o = {
         sub: '订阅',
         add: '添加节点',

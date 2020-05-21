@@ -66,7 +66,6 @@
         this.addnode(data)
       },
       addnode(data) {
-        let ipc = electron.ipcRenderer
         ipc.send('add-node', data)
         this.tro = ''
         this.form = {

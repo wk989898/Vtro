@@ -13,6 +13,8 @@ trojan 的 windows 图形界面
 - 支持 ping,tcp-ping
 - 流量统计由trojan输出数据得出
 - 建议搭配[SwitchyOmega](https://github.com/FelisCatus/SwitchyOmega)使用
+- pac更新可以[自行更新](./proxy/fetchPAC.js)  
+出现错误==>[还原文件](./proxy/_proxy.pac)
 
 ## Feature
 

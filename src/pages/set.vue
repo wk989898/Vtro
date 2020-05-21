@@ -55,7 +55,6 @@
       }
     },
     mounted() {
-      let ipc = electron.ipcRenderer
       ipc.send('get-login')
       ipc.on('config', (e, conf) => {
         let {
@@ -81,7 +80,7 @@
         if (this.$global.link) ipc.send('link')
       })
       setTimeout(() => {
-        this.opneNight({
+        this.openNight({
           startTime: this.startTime,
           endTime: this.endTime
         })
@@ -90,7 +89,6 @@
     watch: {
       proxy: function(newval, old) {
         if (!old) return;
-        let ipc = electron.ipcRenderer
         ipc.send('setConf', {
           proxy: newval
         })
@@ -101,7 +99,6 @@
     },
     methods: {
       changeLogin(e) {
-        let ipc = electron.ipcRenderer
         ipc.send('set-login', e)
       },
       selectNode() {
@@ -117,25 +114,22 @@
           startTime: this.startTime,
           endTime: this.endTime
         }
-        let ipc = electron.ipcRenderer
         ipc.send('setConf', {
           time
         })
         if (!this.night) {
           return this.$message('请确认是否有夜间节点~')
         }
-        const tem = this.opneNight(time)
+        const tem = this.openNight(time)
         tem && this.$message('更改成功')
       },
       timer(mode, timeout, cb) {
-        let ipc = electron.ipcRenderer
         return window.setTimeout(() => {
           ipc.send('change-mode', mode)
         }, timeout);
       },
-      opneNight(time) {
+      openNight(time) {
         if (this.$global.pid1 || this.$global.pid2) return false;
-        let ipc = electron.ipcRenderer
         const [isOpen, last, night = 0] = calcTime(time)
         if (last === 0) {
           this.$message('设置夜间节点无效')
@@ -148,7 +142,6 @@
         return true
       },
       portReset() {
-        let ipc = electron.ipcRenderer
         const max = 1 << 16
         let isPort=false
         const listen = this.listen.map((v, i) => {

@@ -14,15 +14,16 @@
   <div id="app"></div>
   <!-- You can also require other files to run in this process -->
   <script>
-    const process=require('process')
+    const process = require('process')
     const electron = require('electron')
-    const util=require('util')
-    const ping =require('ping')
+    const util = require('util')
+    const ping = require('ping')
     const tcping = util.promisify(require('tcp-ping').ping)
-
     const {
+      ipcRenderer,
       remote
     } = electron
+    window.ipc = ipcRenderer
     const {
       Menu,
       MenuItem,

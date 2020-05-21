@@ -42,7 +42,6 @@
       }
     },
     mounted() {
-      let ipc = electron.ipcRenderer
       ipc.send('get-nodes')
       ipc.on('update-nodes', (e, arg) => {
         console.log('update-nodes')
@@ -72,7 +71,6 @@
           if (v === e) this.idx = i
         })
         console.log('select node index:', this.idx)
-        let ipc = electron.ipcRenderer
         ipc.send('change-linkNode', e)
       },
       contextmenu(r, d, e) {
@@ -86,7 +84,6 @@
       },
       contextClick(type, e) {
         e.stopPropagation()
-        let ipc = electron.ipcRenderer
         let node = this.node,
           self = this
         if (type === 'delete') {

@@ -18,7 +18,6 @@
       }
     },
     mounted() {
-      let ipc = electron.ipcRenderer
       ipc.on('flow', (e, flows) => {
         this.received+=flows[0]
         this.sent+=flows[1]

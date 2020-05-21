@@ -6,6 +6,8 @@
     </div>
     <br/>
     <el-input class="sub" placeholder="输入订阅地址" v-model="sub" clearable />
+    <label>使用代理连接(尚未实现)</label>
+    <el-switch v-model="proxy" />
     <el-button plain type="success" @click="update">更新订阅</el-button>
     <div>{{confirm}}</div>
   </div>
@@ -22,15 +24,14 @@
         test: 1,
         sub: null,
         subs: [],
-        confirm: '点击订阅可以修改~'
+        confirm: '点击订阅可以修改~',
+        proxy:false
       }
     },
     activated() {
-      let ipc = electron.ipcRenderer
       ipc.send('get-sub')
     },
     mounted() {
-      let ipc = electron.ipcRenderer
       ipc.on('subs', (e, arg) => {
         this.subs = arg
       })
@@ -40,13 +41,13 @@
     },
     methods: {
       async update() {
-        let ipc = electron.ipcRenderer
         this.confirm = ''
         const temp = this.sub ? this.sub : this.subs[0]
         if (!temp) {
           return this.$message("请输入订阅！");
         }
         const list = Array.from(new Set(this.subs).add(temp))
+        // if(this.proxy&&this.$global.link) return ipc.send('sub-proxy',list)
         console.time('fetch')
         let nodes = [],
           i = 0,
@@ -55,7 +56,6 @@
           await fetch(list[i]).then(e => e.text()).then(res => {
             nodes.push(Trojan.subscribe(res))
           }).catch(e => {
-            console.log(e)
             if (list[i])
               this.confirm += `can't get subscribe from ${list[i]}\n`
           })
@@ -86,7 +86,6 @@
         });
       },
       remove(i) {
-        let ipc = electron.ipcRenderer
         console.log('will remove:', this.subs[i])
         ipc.send('remove-sub', this.subs[i])
       }

@@ -17,5 +17,5 @@ export function fetchPAC(path) {
       writerStream.end();
     })
 }
-fetchPAC('./pac.js')
-console.log('write into pac.js')
+fetchPAC('./proxy.pac')
+console.log('write into proxy.pac')
