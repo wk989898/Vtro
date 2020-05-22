@@ -4,6 +4,7 @@ const path = require('path')
 const fs = require('fs')
 const cp = require('child_process')
 const http = require('http')
+const https = require('https')
 const process = require('process')
 const dns = require('dns')
 
@@ -61,6 +62,9 @@ if (!Lock) {
     ]
     const contextMenu = Menu.buildFromTemplate(traylist)
     tray.setToolTip('Vtro')
+    tray.addListener("click", () => {
+      win.show()
+    })
     tray.setContextMenu(contextMenu)
     tray.on('click', () => {
       !win.isVisible() && win.show()
@@ -332,10 +336,15 @@ ipcMain.on('get-sub', e => {
     return v !== sub
   })
   e.reply('removed')
-}).on('sub-proxy', (e, list) => {
-  // let socks5 = `socks5://127.0.0.1:1080`
-  // win.webContents.session.setProxy({ proxyRules: socks5 })
-  // else win.webContents.session.setProxy({})
+}).on('sub-proxy', (e, proxy) => {
+  if (proxy)
+    fs.readFile(_path('./trojan/config.json'), async (err, res) => {
+      if (err) appendLog(err)
+      const { local_addr, local_port } = JSON.parse(res.toString())
+      let socks5 = `socks://${local_addr}:${local_port},localhost`
+      win.webContents.session.setProxy({ proxyRules: socks5 })
+    })
+  else win.webContents.session.setProxy({})
 })
 
 // 手动添加节点 删除节点  更改节点配置
@@ -387,9 +396,10 @@ ipcMain.on('set-login', (e, login) => {
 }).on('get-login', e => {
   e.reply('login', app.getLoginItemSettings().openAtLogin)
 })
-ipcMain.on('test', e => {
-  e.reply('test-replay', 'test')
-})
+// ipcMain.on('test', e => {
+//   e.reply('test-replay', 'test')
+// })
+
 // 菜单
 var template = [
   {

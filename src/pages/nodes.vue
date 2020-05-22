@@ -38,7 +38,8 @@
       return {
         nodes: null,
         node: null,
-        idx: null
+        idx: null,
+        selectNode: null
       }
     },
     mounted() {
@@ -46,8 +47,9 @@
       ipc.on('update-nodes', (e, arg) => {
         console.log('update-nodes')
         this.nodes = arg
-        if (!this.nodes[0].ping) this.nodes.forEach(v => {
+        this.nodes.forEach((v, i) => {
           this.$set(v, 'ping', 0)
+          if (this.selectNode === v) this.idx = i
         })
         // this.$forceUpdate()
       }).on('ping', e => {
@@ -64,11 +66,15 @@
         rowIndex
       }) {
         if (rowIndex === this.idx) return 'select-row';
+        if(this.nodes[rowIndex].ping==='fail') return 'fail'
         return '';
       },
       select(e, r, ele) {
         this.nodes.forEach((v, i) => {
-          if (v === e) this.idx = i
+          if (v === e) {
+            this.idx = i
+            this.selectNode = v
+          }
         })
         console.log('select node index:', this.idx)
         ipc.send('change-linkNode', e)
@@ -166,5 +172,8 @@
   }
   .el-table .select-row {
     background: rgb(172, 255, 208);
+  }
+  .el-table .fail{
+    color:red;
   }
 </style>

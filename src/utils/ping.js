@@ -44,6 +44,7 @@ export function _tcping(host, cb) {
     attempts: 5,
   }).then(cb)
 }
+
 export function makeping(lists) {
   lists.forEach(list => {
     // list.ping = 'wait'

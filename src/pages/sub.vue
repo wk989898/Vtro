@@ -6,10 +6,13 @@
     </div>
     <br/>
     <el-input class="sub" placeholder="输入订阅地址" v-model="sub" clearable />
-    <label>使用代理连接(尚未实现)</label>
-    <el-switch v-model="proxy" />
     <el-button plain type="success" @click="update">更新订阅</el-button>
-    <div>{{confirm}}</div>
+    <label>使用代理连接</label>
+    <el-switch v-model="proxy" />
+    <div>
+      <p>点击订阅连接可以修改~</p>
+      <p>{{confirm}}</p>
+      </div>
   </div>
 </template>
 
@@ -24,7 +27,7 @@
         test: 1,
         sub: null,
         subs: [],
-        confirm: '点击订阅可以修改~',
+        confirm: '',
         proxy:false
       }
     },
@@ -39,6 +42,11 @@
         ipc.send('get-sub')
       })
     },
+    watch:{
+      proxy:function (newval) {
+        ipc.send('sub-proxy',newval)
+      }
+    },
     methods: {
       async update() {
         this.confirm = ''
@@ -47,7 +55,6 @@
           return this.$message("请输入订阅！");
         }
         const list = Array.from(new Set(this.subs).add(temp))
-        // if(this.proxy&&this.$global.link) return ipc.send('sub-proxy',list)
         console.time('fetch')
         let nodes = [],
           i = 0,

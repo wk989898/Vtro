@@ -40,10 +40,10 @@
     created() {
       this.$router.push(`/`)
       // test
-      ipc.send('test')
-      ipc.on('test-replay', (e, r) => {
-        console.log(r)
-      })
+      // ipc.send('test')
+      // ipc.on('test-replay', (e, r) => {
+      //   console.log(r)
+      // })
     },
     mounted() {
       let o = {
