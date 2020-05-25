@@ -65,8 +65,12 @@
         row,
         rowIndex
       }) {
-        if (rowIndex === this.idx) return 'select-row';
-        if(this.nodes[rowIndex].ping==='fail') return 'fail'
+        const now = this.$global.now
+        if (rowIndex === this.idx) {
+          if (now.ip === this.nodes[rowIndex].ip)
+            return 'select-row';
+        }
+        if (this.nodes[rowIndex].ping === 'fail') return 'fail'
         return '';
       },
       select(e, r, ele) {
@@ -173,7 +177,7 @@
   .el-table .select-row {
     background: rgb(172, 255, 208);
   }
-  .el-table .fail{
-    color:red;
+  .el-table .fail {
+    color: red;
   }
 </style>

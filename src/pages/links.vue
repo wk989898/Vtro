@@ -37,7 +37,7 @@
           ipc.send('link')
           console.log('re-connect', conf.mode);
         }
-        this.now = now
+        this.$global.now=this.now = now
         this.now.mode = conf.mode
       })
     },

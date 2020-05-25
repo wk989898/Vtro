@@ -405,7 +405,7 @@ var template = [
   {
     type: 'submenu',
     id: 'list',
-    label: '设置节点',
+    label: '节点',
     submenu: [
       { id: 'sub', label: '订阅' },
       { id: 'add', label: '添加节点' },
