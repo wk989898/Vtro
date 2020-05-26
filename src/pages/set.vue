@@ -28,6 +28,17 @@
         <el-input v-model="listen[2]" name="_pac" />
         <el-button @click="portReset">更改</el-button>
       </el-tab-pane>
+      <el-tab-pane label="其他">
+        <el-switch style="display: block" v-model="isIP"  @change="setOther('isIP')"
+        active-color="#f1ff11" inactive-color="#114949" active-text="ip连接" inactive-text="域名连接"/><br/>
+        reuse_session:
+        <el-switch v-model="reuse_session" label="reuse_session" @change="setOther('reuse_session')"/><br/><br/>
+        reuse_port:
+        <el-switch v-model="reuse_port" label="reuse_port" @change="setOther('reuse_port')"/><br/><br/>
+        fast_open:
+        <el-switch v-model="fast_open" label="fast_open" @change="setOther('fast_open')"/><br/><br/>
+        <span>如果不懂请保持默认~</span>
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -51,7 +62,11 @@
         night: null,
         pid1: null,
         pid2: null,
-        listen: []
+        listen: [],
+        isIP: false,
+        reuse_port: false,
+        fast_open: false,
+        reuse_session: true
       }
     },
     mounted() {
@@ -95,7 +110,7 @@
         if (this.$global.link) setTimeout(() => {
           ipc.send('link')
         }, 1000)
-      },
+      }
     },
     methods: {
       changeLogin(e) {
@@ -143,23 +158,26 @@
       },
       portReset() {
         const max = 1 << 16
-        let isPort=false
+        let isPort = false
         const listen = this.listen.map((v, i) => {
           v = Number(v)
           if (v >= max || v <= 0) {
             this.$message('无效的端口')
-            isPort=true
+            isPort = true
             return [1080, 1081, 1082][i]
           }
           return v
         })
-        if(isPort) return ;
+        if (isPort) return;
         ipc.send('setConf', {
           listen
         })
         if (this.$global.link) setTimeout(() => {
           ipc.send('link')
         }, 1000)
+      },
+      setOther(type){
+        ipc.send('other', [type, this[type]])
       }
     }
   }

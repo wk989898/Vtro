@@ -10,6 +10,12 @@ const dns = require('dns')
 
 
 var win, tray, trojan, privo, privoxypid, trojanpid
+var other = {
+  isIP: false,
+  fast_open: false,
+  reuse_port: false,
+  reuse_session: true
+}
 const server = http.createServer()
 
 function createWindow() {
@@ -209,14 +215,19 @@ function changeConfig() {
     let data = JSON.parse(res.toString())
     openConf('r', null, async res => {
       let now
+      const { isIP = false, fast_open = false, reuse_port = false, reuse_session = true } = other
       if (!res.config.night) now = res.config.day
       else now = res.config.mode === 'night' ? res.config.night : res.config.day
       // password,addr,port
-      data.remote_addr = now.addr
+      data.remote_addr = isIP ? now.ip : now.addr
       data.remote_port = now.port
       data.password[0] = now.password
       // socks5 port
       data.local_port = res.config.listen[0] || 1080
+      // other
+      data.tcp.reuse_port = reuse_port
+      data.tcp.fast_open = fast_open
+      data.ssl.reuse_session = reuse_session
       await fs.writeFile(_path('./trojan/config.json'), JSON.stringify(data), 'utf-8', err => {
         if (err) appendLog(err)
       })
@@ -395,6 +406,9 @@ ipcMain.on('set-login', (e, login) => {
   }
 }).on('get-login', e => {
   e.reply('login', app.getLoginItemSettings().openAtLogin)
+}).on('other', (e, [type, bool]) => {
+  if (type in other)
+    other[type] = bool
 })
 // ipcMain.on('test', e => {
 //   e.reply('test-replay', 'test')
@@ -437,7 +451,21 @@ var template = [
       },
     ]
   },
-
+  {
+    id: 'pac',
+    label: '更新pac',
+    click() {
+      privo = cp.exec('node fetchPAC.js', {
+        cwd: _path('./proxy'),
+        windowsHide: true
+        // shell: true,
+      }, (err, stdout, stderr) => {
+        let log = '更新pac失败'
+        if (err) appendLog(log)
+        appendLog(stdout)
+      })
+    }
+  }
 ]
 if (!app.isPackaged) {
   template.push({
