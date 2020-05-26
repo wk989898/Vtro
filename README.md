@@ -9,7 +9,8 @@ trojan 的 windows 图形界面
 ## 注意
 
 - 可以订阅和添加节点,更新订阅时会删除原有所有节点
-- 默认[配置](extra-trojan/config.json) ssl 验证为`false` 其它保持默认，如有需要请自行更改  
+- 默认[配置](extra-trojan/config.json) ssl 验证为`false` 其它保持默认，如果其他选项里没有则需要请自行更改  
+  ❗ 每次启动设置默认 
 - 支持 ping,tcp-ping
 - 流量统计由trojan输出数据得出
 - 建议搭配[SwitchyOmega](https://github.com/FelisCatus/SwitchyOmega)使用
@@ -36,7 +37,7 @@ trojan 的 windows 图形界面
     |pac|localhost|1082/pac|
     |http|-|1081|
     |socks5|-|1080|
-    > 设置 off 后只会开启 socks5 端口 !
+    > 设置 off 后只会开启 socks5 端口 ❗
   - listen `array` default: `[1080,1081,1082]` 监听端口
   - time `object`
   - startTime default: `'19:30'`
