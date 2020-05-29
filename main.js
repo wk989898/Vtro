@@ -11,7 +11,7 @@ const dns = require('dns')
 
 var win, tray, trojan, privo, privoxypid, trojanpid
 var other = {
-  isIP: false,
+  isIP: true,
   fast_open: false,
   reuse_port: false,
   reuse_session: true
@@ -215,7 +215,7 @@ function changeConfig() {
     let data = JSON.parse(res.toString())
     openConf('r', null, async res => {
       let now
-      const { isIP = false, fast_open = false, reuse_port = false, reuse_session = true } = other
+      const { isIP = true, fast_open = false, reuse_port = false, reuse_session = true } = other
       if (!res.config.night) now = res.config.day
       else now = res.config.mode === 'night' ? res.config.night : res.config.day
       // password,addr,port

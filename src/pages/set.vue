@@ -63,7 +63,7 @@
         pid1: null,
         pid2: null,
         listen: [],
-        isIP: false,
+        isIP: true,
         reuse_port: false,
         fast_open: false,
         reuse_session: true
