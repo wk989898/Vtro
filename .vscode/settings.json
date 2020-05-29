@@ -1,5 +1,0 @@
-{
-  "deno.enable": false,
-  "javascript.validate.enable": false,
-  "eslint.enable": false
-}
