@@ -37,7 +37,7 @@ trojan 的 windows 图形界面
     |pac|localhost|1082/pac|
     |http|-|1081|
     |socks5|-|1080|
-    > 设置 off 后只会开启 socks5 端口 ❗
+    > 设置 off 后会开启 socks5 端口 ❗
   - listen `array` default: `[1080,1081,1082]` 监听端口
   - time `object`
   - startTime default: `'19:30'`
@@ -64,7 +64,7 @@ cd dist
 - [x] 更改监听端口
 - [x] 统计流量  
 - [x] 代理更新订阅
-- [ ] 更新pac
+- [x] 更新pac
 - [ ] 更加新的交互设计🙄
 
 ## Credits

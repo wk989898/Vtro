@@ -31,15 +31,16 @@
         this.$global.link = false
       }).on('config', (e, conf) => {
         console.log(conf.mode)
-        const now = (conf.mode === 'night' ? conf.night : conf.day) || conf.day;
+        const now = conf.mode === 'day' ? conf.day : conf.night.addr ? conf.night : conf.day
         if (this.$global.link && conf.mode === this.now.mode && now.name !== this.now.name) {
           // 已经连接 && mode相同 && 名字相同
           ipc.send('link')
           console.log('re-connect', conf.mode);
         }
-        this.$global.now=this.now = now
+        this.$global.now = this.now = now
         this.now.mode = conf.mode
       })
+      ipc.send('link')
     },
     methods: {
       btnclick(type) {
