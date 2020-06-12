@@ -5,3 +5,4 @@ dist
 256.ico
 .vscode
 test
+jest.config.js

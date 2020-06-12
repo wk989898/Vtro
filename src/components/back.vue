@@ -1,7 +1,6 @@
 <template>
   <div>
-    <el-backtop  @click="backtop">
-    </el-backtop>
+    <el-backtop  @click="backtop" bottom="60" style="z-index:999"/>
   </div>
 </template>
 

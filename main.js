@@ -416,7 +416,7 @@ ipcMain.on('set-login', (e, login) => {
 })
 
 ipcMain.on('pac', e => {
-  privo = cp.exec('node fetchPAC.js', {
+  cp.exec('node fetchPAC.js', {
     cwd: _path('./proxy'),
     windowsHide: true
     // shell: true,
@@ -435,12 +435,12 @@ ipcMain.on('pac', e => {
 //   e.reply('test-replay', 'test')
 // })
 
-var menu=null
+var menu = null
 if (!app.isPackaged) {
   menu = Menu.buildFromTemplate([{
     id: 'refresh',
     label: 'refresh',
     role: 'forceReload'
   }])
-} 
+}
 Menu.setApplicationMenu(menu)

@@ -28,9 +28,11 @@
     </el-menu-item>
 </el-menu>
 
-  <keep-alive>
-    <router-view />
-  </keep-alive>
+  <div class="content">
+    <keep-alive>
+      <router-view />
+    </keep-alive>
+  </div>
 
     <back />
     <links />
@@ -52,7 +54,7 @@
       back,
     },
     created() {
-      this.$router.push(`/`)
+      // this.$router.push(`/`)
       // test
       // ipc.send('test')
       // ipc.on('test-replay', (e, r) => {
@@ -88,6 +90,9 @@
     padding-top: 3px;
   }
   .el-menu{
-    margin-bottom: 5% !important;
+    z-index: 99;
+  }
+  .content{
+    margin-top: 5%;
   }
 </style>
