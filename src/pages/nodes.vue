@@ -1,5 +1,10 @@
 <template>
   <div class="nodes">
+    <div>
+      <span>测试连接 </span>
+      <el-button round @click="ping('ping')">ping</el-button>
+      <el-button round @click="ping">tcp-ping</el-button>
+    </div>
     <el-table :data="nodes" border style="width: 100%" :row-class-name="tableRowClassName" @row-dblclick="select" @row-contextmenu="contextmenu">
       <el-table-column prop="ip" label="ip" width="180">
       </el-table-column>
@@ -52,15 +57,15 @@
           if (this.selectNode === v) this.idx = i
         })
         // this.$forceUpdate()
-      }).on('ping', e => {
-        makeping(this.nodes)
-      }).on('tcp-ping', e => {
-        maketcping(this.nodes)
       }).on('deleted', (e, arg) => {
         ipc.send('get-nodes')
       })
     },
     methods: {
+      ping(type){
+        if(type==='ping') return makeping(this.nodes)
+        maketcping(this.nodes)
+      },
       tableRowClassName({
         row,
         rowIndex

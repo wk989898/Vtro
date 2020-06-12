@@ -96,6 +96,10 @@ app.on('activate', function () {
 
 
 // utils
+function send(channel, args) {
+  return win.webContents.send(channel, args)
+}
+
 function type(a) {
   return Object.prototype.toString.call(a).slice(8).replace(']', '').toLowerCase()
 }
@@ -410,79 +414,94 @@ ipcMain.on('set-login', (e, login) => {
   if (type in other)
     other[type] = bool
 })
+
+ipcMain.on('pac', e => {
+  privo = cp.exec('node fetchPAC.js', {
+    cwd: _path('./proxy'),
+    windowsHide: true
+    // shell: true,
+  }, (err, stdout, stderr) => {
+    let log = '更新pac失败'
+    if (err) appendLog(log)
+    appendLog(stdout)
+  })
+}).on('trojan-log', e => {
+  shell.openItem(_path('trojan/trojan-log.txt'))
+}).on('link-log', e => {
+  shell.openItem(_path('trojan/log.txt'))
+})
+
 // ipcMain.on('test', e => {
 //   e.reply('test-replay', 'test')
 // })
 
 // 菜单
-var template = [
-  {
-    type: 'submenu',
-    id: 'list',
-    label: '节点',
-    submenu: [
-      { id: 'sub', label: '订阅' },
-      { id: 'add', label: '添加节点' },
-      { id: 'ping', label: 'ping' },
-      { id: 'tcp-ping', label: 'tcp-ping' }
-    ]
-  },
-  {
-    id: 'set',
-    label: '设置',
-    click() {
-      send('set')
-    }
-  },
-  {
-    id: 'log',
-    label: '日志',
-    submenu: [
-      {
-        id: 'trojan-log', label: 'trojan日志',
-        click: () => {
-          shell.openItem(_path('trojan/trojan-log.txt'))
-        }
-      },
-      {
-        id: 'linklog', label: '连接日志', click() {
-          shell.openItem(_path('trojan/log.txt'))
-        }
-      },
-    ]
-  },
-  {
-    id: 'pac',
-    label: '更新pac',
-    click() {
-      privo = cp.exec('node fetchPAC.js', {
-        cwd: _path('./proxy'),
-        windowsHide: true
-        // shell: true,
-      }, (err, stdout, stderr) => {
-        let log = '更新pac失败'
-        if (err) appendLog(log)
-        appendLog(stdout)
-      })
-    }
-  }
-]
+// var template = [
+//   {
+//     type: 'submenu',
+//     id: 'list',
+//     label: '节点',
+//     submenu: [
+//       { id: 'sub', label: '订阅' },
+//       { id: 'add', label: '添加节点' },
+//       { id: 'ping', label: 'ping' },
+//       { id: 'tcp-ping', label: 'tcp-ping' }
+//     ]
+//   },
+//   {
+//     id: 'set',
+//     label: '设置',
+//     click() {
+//       send('set')
+//     }
+//   },
+//   {
+//     id: 'log',
+//     label: '日志',
+//     submenu: [
+//       {
+//         id: 'trojan-log', label: 'trojan日志',
+//         click: () => {
+//           shell.openItem(_path('trojan/trojan-log.txt'))
+//         }
+//       },
+//       {
+//         id: 'linklog', label: '连接日志', click() {
+//           shell.openItem(_path('trojan/log.txt'))
+//         }
+//       },
+//     ]
+//   },
+//   {
+//     id: 'pac',
+//     label: '更新pac',
+//     click() {
+//       privo = cp.exec('node fetchPAC.js', {
+//         cwd: _path('./proxy'),
+//         windowsHide: true
+//         // shell: true,
+//       }, (err, stdout, stderr) => {
+//         let log = '更新pac失败'
+//         if (err) appendLog(log)
+//         appendLog(stdout)
+//       })
+//     }
+//   }
+// ]
+var menu=null
 if (!app.isPackaged) {
-  template.push({
+  menu = Menu.buildFromTemplate([{
     id: 'refresh',
     label: 'refresh',
     role: 'forceReload'
-  })
-}
-const menu = Menu.buildFromTemplate(template)
+  }])
+} 
 Menu.setApplicationMenu(menu)
 
-function send(channel, args) {
-  return win.webContents.send(channel, args)
-}
-// 设置节点
-menu.items[0].submenu.items.forEach(val => {
-  val.click = () => {
-    send(val.id)
-  }
-})
+
+// // 设置节点
+// menu.items[0].submenu.items.forEach(val => {
+//   val.click = () => {
+//     send(val.id)
+//   }
+// })

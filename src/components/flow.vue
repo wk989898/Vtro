@@ -1,7 +1,7 @@
 <template>
   <div class="flow">
-    <span>下载:{{flows[0]}}</span>
-    <span>上传:{{flows[1]}}</span>
+    <p>下载:{{flows[0]}}</p>
+    <p>上传:{{flows[1]}}</p>
   </div>
 </template>
 
@@ -28,13 +28,18 @@
 </script>
 <style>
 .flow{
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  background: gray;
-  color: white;
-  border-radius: 2px;
-  padding: 2px 5px;
+  width: 20%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   opacity: .8;
+}
+.flow>p{
+  margin: 0;
+}
+.flow>p:first-child{
+  color: blue
+}
+.flow>p:last-child{
+  color: green
 }
 </style>

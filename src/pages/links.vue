@@ -1,9 +1,10 @@
 <template>
-  <div>
-    <el-button type="primary" id="link" @click="btnclick('link')">连接</el-button>
-    <el-button type="primary" id="close" @click="btnclick('close')">关闭</el-button>
-    <el-switch v-model="connect" disabled active-color="#13ce66" inactive-color="#ff4949" style="z-index:9"></el-switch>
-    <span class="now">连接节点：{{now.name}}</span>
+  <div class="links">
+    <flow />
+    <div class="link">
+      <el-switch @change="changelink" v-model="connect" active-text="开启" inactive-text="关闭" />
+      <p class="now">{{now.name}}</p>
+    </div>
   </div>
 </template>
 
@@ -11,6 +12,7 @@
   import {
     calcTime
   } from '../utils/time'
+  import flow from '../components/flow'
   export default {
     data() {
       return {
@@ -18,16 +20,25 @@
         now: ''
       }
     },
+    components: {
+      flow
+    },
     mounted() {
       ipc.send('getConf')
       ipc.on('linked', () => {
         this.connect = true
-        this.$message('已连接')
+        this.$message({
+          message: '已连接',
+          duration: 1000
+        })
         this.$global.link = true
       }).on('closed', () => {
         this.connect = false
         if (this.$global.link)
-          this.$message('已断开')
+          this.$message({
+            message: '已断开',
+            duration: 1000
+          })
         this.$global.link = false
       }).on('config', (e, conf) => {
         console.log(conf.mode)
@@ -43,8 +54,9 @@
       ipc.send('link')
     },
     methods: {
-      btnclick(type) {
-        ipc.send(type)
+      changelink(e) {
+        if (e) return ipc.send('link')
+        return ipc.send('close')
       }
     }
   }
@@ -54,5 +66,26 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+    color: black;
+  }
+  .links {
+    position: fixed;
+    display: flex;
+    align-content: space-between;
+    justify-content: center;
+    padding: 1%;
+    z-index: 99;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    box-shadow: 0 -2px 4px rgba(1, 1, 1, .1);
+    background-color: #fff;
+  }
+  .links p {
+    margin: 0;
+  }
+  .link {
+    flex: 1;
+    margin-left: 5px;
   }
 </style>

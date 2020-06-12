@@ -29,14 +29,10 @@
         <el-button @click="portReset">更改</el-button>
       </el-tab-pane>
       <el-tab-pane label="其他">
-        <el-switch style="display: block" v-model="isIP"  @change="setOther('isIP')"
-        active-color="#f1ff11" inactive-color="#114949" active-text="ip连接" inactive-text="域名连接"/><br/>
-        reuse_session:
-        <el-switch v-model="reuse_session" label="reuse_session" @change="setOther('reuse_session')"/><br/><br/>
-        reuse_port:
-        <el-switch v-model="reuse_port" label="reuse_port" @change="setOther('reuse_port')"/><br/><br/>
-        fast_open:
-        <el-switch v-model="fast_open" label="fast_open" @change="setOther('fast_open')"/><br/><br/>
+        <el-switch style="display: block" v-model="isIP" @change="setOther('isIP')" active-color="#f1ff11" inactive-color="#114949" active-text="ip连接" inactive-text="域名连接" /><br/> reuse_session:
+        <el-switch v-model="reuse_session" label="reuse_session" @change="setOther('reuse_session')" /><br/><br/> reuse_port:
+        <el-switch v-model="reuse_port" label="reuse_port" @change="setOther('reuse_port')" /><br/><br/> fast_open:
+        <el-switch v-model="fast_open" label="fast_open" @change="setOther('fast_open')" /><br/><br/>
         <span>如果不懂请保持默认~</span>
       </el-tab-pane>
     </el-tabs>
@@ -71,6 +67,7 @@
     },
     mounted() {
       ipc.send('get-login')
+      ipc.send('getConf')
       ipc.on('config', (e, conf) => {
         let {
           proxy,
@@ -176,7 +173,7 @@
           ipc.send('link')
         }, 1000)
       },
-      setOther(type){
+      setOther(type) {
         ipc.send('other', [type, this[type]])
       }
     }

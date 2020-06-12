@@ -1,41 +1,55 @@
 <template>
   <div class="main">
-    <el-collapse v-model="activeNames">
-      <el-collapse-item title="连接" name="1">
-        <links />
-      </el-collapse-item>
-      <el-collapse-item title="节点" name="2">
-        <nodes />
-      </el-collapse-item>
-      <el-collapse-item :title="type" name="3">
-        <keep-alive>
-          <router-view />
-        </keep-alive>
-      </el-collapse-item>
-    </el-collapse>
+  <el-menu :default-active="activeIndex" class="el-menu" mode="horizontal" @select="select">
+    <el-menu-item index="nodes">列表</el-menu-item>
+    <el-submenu index="add-link">
+      <template slot="title">添加节点</template>
+      <el-menu-item index="sub">订阅</el-menu-item>
+      <el-menu-item index="add">手动添加</el-menu-item>
+    </el-submenu>
+    <el-menu-item index="set">设置</el-menu-item>
+    <el-submenu index="log">
+      <template slot="title">日志</template>
+      <el-menu-item index="trojan-log">trojan日志</el-menu-item>
+      <el-menu-item index="link-log">连接日志</el-menu-item>
+    </el-submenu>
+    <el-menu-item index="pac">
+      更新pac
+      <!-- <el-popconfirm
+  confirmButtonText='确定'
+  cancelButtonText='取消'
+  icon="el-icon-info"
+  iconColor="green"
+  @Confirm="confirm"
+  title="确定更新pac吗？"
+>
+        <div class="el-submenu__title" slot="reference">更新pac</div>
+      </el-popconfirm> -->
+    </el-menu-item>
+</el-menu>
+
+  <keep-alive>
+    <router-view />
+  </keep-alive>
+
     <back />
-    <flow />
+    <links />
   </div>
 </template>
 
 <script>
   import links from './pages/links'
-  import nodes from './pages/nodes'
   import back from './components/back'
-  import flow from './components/flow'
   export default {
     name: 'App',
     data() {
       return {
-        activeNames: ['1', '2', '3'],
-        type: '节点列表'
+        activeIndex:'nodes',
       }
     },
     components: {
       links,
       back,
-      nodes,
-      flow
     },
     created() {
       this.$router.push(`/`)
@@ -45,19 +59,18 @@
       //   console.log(r)
       // })
     },
-    mounted() {
-      let o = {
-        sub: '订阅',
-        add: '添加节点',
-        set: '设置'
-      }
-      Object.keys(o).forEach(v => {
-        ipc.on(v, (e, arg) => {
-          this.$router.push(`/${v}`)
-          this.type = o[v]
-          this.activeNames = ['1', '3']
-        })
-      })
+    methods:{
+      select(index){
+        console.log(index);
+        if(/pac|log/.test(index)){
+          ipc.send(index)
+          return ;
+        }
+        this.$router.push(`/${index}`)
+      },
+      // confirm(){
+      //   console.log('confirm');
+      // }
     }
   }
 </script>
@@ -73,5 +86,8 @@
   .main {
     padding: 20px;
     padding-top: 3px;
+  }
+  .el-menu{
+    margin-bottom: 5% !important;
   }
 </style>

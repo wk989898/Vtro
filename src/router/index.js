@@ -9,26 +9,31 @@ Vue.use(Router)
 import sub from '../pages/sub'
 import add from '../pages/add'
 import set from '../pages/set'
+import nodes from '../pages/nodes'
 
-const routes=[
+const routes = [
   {
-    path:'/',
-    redirect:'/set'
+    path: '/',
+    redirect: '/nodes'
   },
   {
-    path:'/set',
-    component:set
+    path: '/set',
+    component: set
   },
   {
-    path:'/sub',
-    component:sub
+    path: '/sub',
+    component: sub
   },
   {
-    path:'/add',
-    component:add  
+    path: '/add',
+    component: add
+  },
+  {
+    path: '/nodes',
+    component: nodes
   }
 ]
-const router=new Router({
+const router = new Router({
   routes
 })
 export default router
