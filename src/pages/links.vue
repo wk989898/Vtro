@@ -45,7 +45,7 @@
           duration: 1000
         })
       }).on('closed', () => {
-        if (this.$global.link)
+        if (!this.isLink )
           this.$message({
             message: '已断开',
             duration: 1000

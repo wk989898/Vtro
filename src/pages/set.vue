@@ -169,9 +169,6 @@
         ipc.send('setConf', {
           listen
         })
-        // if (this.$global.link) setTimeout(() => {
-        //   ipc.send('link')
-        // }, 1000)
       },
       setOther(type) {
         ipc.send('other', [type, this[type]])
