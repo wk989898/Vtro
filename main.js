@@ -326,7 +326,7 @@ ipcMain.on('get-nodes', e => {
 }).on('change-mode', (e, mode) => {
   openConf('a', null, res => {
     res.config.mode = mode
-    e.reply('mode')
+    e.reply('update-mode')
   })
 })
 // 获取订阅 更新订阅 删除订阅 set-proxy

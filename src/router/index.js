@@ -17,6 +17,10 @@ const routes = [
     redirect: '/nodes'
   },
   {
+    path: '/nodes',
+    component: nodes
+  },
+  {
     path: '/set',
     component: set
   },
@@ -28,10 +32,7 @@ const routes = [
     path: '/add',
     component: add
   },
-  {
-    path: '/nodes',
-    component: nodes
-  }
+  
 ]
 const router = new Router({
   routes

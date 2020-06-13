@@ -63,16 +63,12 @@
     },
     methods:{
       select(index){
-        console.log(index);
         if(/pac|log/.test(index)){
           ipc.send(index)
           return ;
         }
         this.$router.push(`/${index}`)
       },
-      // confirm(){
-      //   console.log('confirm');
-      // }
     }
   }
 </script>
@@ -90,6 +86,8 @@
     padding-top: 3px;
   }
   .el-menu{
+    position: sticky !important;
+    top: 0;
     z-index: 99;
   }
   .content{

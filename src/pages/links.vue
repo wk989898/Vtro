@@ -2,7 +2,7 @@
   <div class="links">
     <flow />
     <div class="link">
-      <el-switch @change="changelink" v-model="connect" active-text="开启" inactive-text="关闭" />
+      <el-switch v-model="isLink" active-text="开启" inactive-text="关闭" />
       <p class="now">{{now.name}}</p>
     </div>
   </div>
@@ -16,48 +16,43 @@
   export default {
     data() {
       return {
-        connect: false,
-        now: ''
+        now: {},
+        isLink: false
       }
     },
     components: {
       flow
     },
+    watch: {
+      isLink: function(v) {
+        if (v) return ipc.send('link')
+        return ipc.send('close')
+      }
+    },
     mounted() {
       ipc.send('getConf')
-      ipc.on('linked', () => {
-        this.connect = true
+      ipc.on('config', (e, conf) => {
+        const now = conf.mode === 'day' ? conf.day : conf.night.addr ? conf.night : conf.day
+        if (this.isLink && this.now.ip && now.ip !== this.now.ip) {
+          // 已经连接 && ip 不相同
+          ipc.send('link')
+          console.log('re-connect')
+        }
+        this.now = now
+      }).on('linked', () => {
         this.$message({
           message: '已连接',
           duration: 1000
         })
-        this.$global.link = true
       }).on('closed', () => {
-        this.connect = false
         if (this.$global.link)
           this.$message({
             message: '已断开',
             duration: 1000
           })
-        this.$global.link = false
-      }).on('config', (e, conf) => {
-        console.log(conf.mode)
-        const now = conf.mode === 'day' ? conf.day : conf.night.addr ? conf.night : conf.day
-        if (this.$global.link && conf.mode === this.now.mode && now.name !== this.now.name) {
-          // 已经连接 && mode相同 && 名字相同
-          ipc.send('link')
-          console.log('re-connect', conf.mode);
-        }
-        this.$global.now = this.now = now
-        this.now.mode = conf.mode
       })
-      ipc.send('link')
-    },
-    methods: {
-      changelink(e) {
-        if (e) return ipc.send('link')
-        return ipc.send('close')
-      }
+      // 开机自动连接
+      this.isLink = true
     }
   }
 </script>

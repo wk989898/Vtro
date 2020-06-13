@@ -29,9 +29,9 @@
         <el-button @click="portReset">更改</el-button>
       </el-tab-pane>
       <el-tab-pane label="其他">
-        <el-switch style="display: block" v-model="isIP" @change="setOther('isIP')" active-color="#f1ff11" inactive-color="#114949" active-text="ip连接" inactive-text="域名连接" /><br/> reuse_session:
-        <el-switch v-model="reuse_session" label="reuse_session" @change="setOther('reuse_session')" /><br/><br/> reuse_port:
-        <el-switch v-model="reuse_port" label="reuse_port" @change="setOther('reuse_port')" /><br/><br/> fast_open:
+        <el-switch style="display: block" v-model="isIP" @change="setOther('isIP')" active-color="#f1ff11" inactive-color="#114949" active-text="ip连接" inactive-text="域名连接" /><br/> reuse session:
+        <el-switch v-model="reuse_session" label="reuse_session" @change="setOther('reuse_session')" /><br/><br/> reuse port:
+        <el-switch v-model="reuse_port" label="reuse_port" @change="setOther('reuse_port')" /><br/><br/> fast open:
         <el-switch v-model="fast_open" label="fast_open" @change="setOther('fast_open')" /><br/><br/>
         <span>如果不懂请保持默认~</span>
       </el-tab-pane>
@@ -87,9 +87,9 @@
         this.listen = listen
       }).on('login', (e, login) => {
         this.login = login
-      }).on('mode', () => {
+      }).on('update-mode', () => {
         ipc.send('getConf')
-        if (this.$global.link) ipc.send('link')
+        // if (this.isLink) ipc.send('link')
       })
       setTimeout(() => {
         this.openNight({
@@ -104,9 +104,9 @@
         ipc.send('setConf', {
           proxy: newval
         })
-        if (this.$global.link) setTimeout(() => {
-          ipc.send('link')
-        }, 1000)
+        // if (this.isLink) setTimeout(() => {
+        //   ipc.send('link')
+        // }, 1000)
       }
     },
     methods: {
@@ -114,13 +114,13 @@
         ipc.send('set-login', e)
       },
       selectNode() {
-        if (this.$global.pid1) {
-          window.clearTimeout(this.$global.pid1)
-          this.$global.pid1 = null
+        if (this.pid1) {
+          window.clearTimeout(this.pid1)
+          this.pid1 = null
         }
-        if (this.$global.pid2) {
-          window.clearTimeout(this.$global.pid2)
-          this.$global.pid2 = null
+        if (this.pid2) {
+          window.clearTimeout(this.pid2)
+          this.pid2 = null
         }
         const time = {
           startTime: this.startTime,
@@ -141,7 +141,7 @@
         }, timeout);
       },
       openNight(time) {
-        if (this.$global.pid1 || this.$global.pid2) return false;
+        if (this.pid1 || this.pid2) return false;
         const [isOpen, last, night = 0] = calcTime(time)
         if (last === 0) {
           this.$message('设置夜间节点无效')
@@ -149,8 +149,8 @@
         }
         console.log('time.js', isOpen, last, night)
         night && this.mode === 'night' && this.timer('day', 0)
-        this.$global.pid1 = this.timer('night', night * 1000)
-        this.$global.pid2 = this.timer('day', last * 1000)
+        this.pid1 = this.timer('night', night * 1000)
+        this.pid2 = this.timer('day', last * 1000)
         return true
       },
       portReset() {
@@ -169,9 +169,9 @@
         ipc.send('setConf', {
           listen
         })
-        if (this.$global.link) setTimeout(() => {
-          ipc.send('link')
-        }, 1000)
+        // if (this.$global.link) setTimeout(() => {
+        //   ipc.send('link')
+        // }, 1000)
       },
       setOther(type) {
         ipc.send('other', [type, this[type]])

@@ -43,8 +43,8 @@
       return {
         nodes: null,
         node: null,
-        idx: null,
-        selectNode: null
+        selectNode: null,
+        now: null
       }
     },
     mounted() {
@@ -54,38 +54,38 @@
         this.nodes = arg
         this.nodes.forEach((v, i) => {
           this.$set(v, 'ping', 0)
-          if (this.selectNode === v) this.idx = i
         })
         // this.$forceUpdate()
       }).on('deleted', (e, arg) => {
         ipc.send('get-nodes')
+      }).on('config', (e, conf) => {
+        const now = conf.mode === 'day' ? conf.day : conf.night.addr ? conf.night : conf.day
+        this.now = now
       })
     },
     methods: {
-      ping(type){
-        if(type==='ping') return makeping(this.nodes)
+      ping(type) {
+        if (type === 'ping') return makeping(this.nodes)
         maketcping(this.nodes)
       },
       tableRowClassName({
         row,
         rowIndex
       }) {
-        const now = this.$global.now
-        if (rowIndex === this.idx) {
-          if (now.ip === this.nodes[rowIndex].ip)
-            return 'select-row';
+        const nodes = this.nodes
+        const now = this.now
+        if (now && nodes[rowIndex].ip === now.ip && nodes[rowIndex].name === now.name) {
+          return 'select-row'
         }
-        if (this.nodes[rowIndex].ping === 'fail') return 'fail'
+        if (nodes[rowIndex].ping === 'fail') return 'fail'
         return '';
       },
       select(e, r, ele) {
-        this.nodes.forEach((v, i) => {
+        this.nodes.forEach((v) => {
           if (v === e) {
-            this.idx = i
             this.selectNode = v
           }
         })
-        console.log('select node index:', this.idx)
         ipc.send('change-linkNode', e)
       },
       contextmenu(r, d, e) {
