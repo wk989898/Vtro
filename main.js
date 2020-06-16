@@ -220,7 +220,7 @@ function changeConfig() {
     openConf('r', null, async res => {
       let now
       const { isIP = true, fast_open = false, reuse_port = false, reuse_session = true } = other
-      if (!res.config.night) now = res.config.day
+      if (!res.config.night.ip) now = res.config.day
       else now = res.config.mode === 'night' ? res.config.night : res.config.day
       // password,addr,port
       data.remote_addr = isIP ? now.ip : now.addr

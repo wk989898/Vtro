@@ -36,12 +36,15 @@ export default {
     })
     ipc
       .on("config", (e, conf) => {
-        let now =
-          (conf.mode === "day"
-            ? conf.day
-            : conf.night.addr
-            ? conf.night
-            : conf.day) || conf.night
+        let now
+        if (!conf.night.ip) now = conf.day
+        else
+          now =
+            conf.mode === "day"
+              ? conf.day
+              : conf.night.addr
+              ? conf.night
+              : conf.day
         if (this.isLink && this.now.ip && now.ip !== this.now.ip) {
           // 已经连接 && ip 不相同
           ipc.send("link")
