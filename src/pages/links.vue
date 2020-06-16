@@ -31,6 +31,12 @@
     },
     mounted() {
       ipc.send('getConf')
+      // 开机自动连接
+      ipc.once('config', (e, conf) => {
+        let node = conf.day || conf.night
+        if (node)
+          this.isLink = true
+      })
       ipc.on('config', (e, conf) => {
         const now = conf.mode === 'day' ? conf.day : conf.night.addr ? conf.night : conf.day
         if (this.isLink && this.now.ip && now.ip !== this.now.ip) {
@@ -45,14 +51,12 @@
           duration: 1000
         })
       }).on('closed', () => {
-        if (!this.isLink )
+        if (!this.isLink)
           this.$message({
             message: '已断开',
             duration: 1000
           })
       })
-      // 开机自动连接
-      this.isLink = true
     }
   }
 </script>

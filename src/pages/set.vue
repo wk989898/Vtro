@@ -89,7 +89,6 @@
         this.login = login
       }).on('update-mode', () => {
         ipc.send('getConf')
-        // if (this.isLink) ipc.send('link')
       })
       setTimeout(() => {
         this.openNight({
@@ -104,9 +103,6 @@
         ipc.send('setConf', {
           proxy: newval
         })
-        // if (this.isLink) setTimeout(() => {
-        //   ipc.send('link')
-        // }, 1000)
       }
     },
     methods: {

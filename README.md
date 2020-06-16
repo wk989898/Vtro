@@ -48,6 +48,7 @@ trojan 的 windows 图形界面
 ## 运行
 
 ```shell
+npm install
 npm run dist
 cd dist
 ```
