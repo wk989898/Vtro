@@ -298,11 +298,11 @@ ipcMain.on('link', (e, type) => {
     } else makeproxy('set', 1)
   })
   e.reply('linked')
-  console.log('link is open')
+  console.log('trojan open')
 }).on('close', (e, r) => {
   allquit()
   e.reply('closed')
-  console.log('link is closed')
+  console.log('trojan closed')
 })
 
 // 获取节点 更改连接节点 夜间节点 mode

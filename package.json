@@ -55,11 +55,11 @@
   "author": "wk989898",
   "license": "ISC",
   "devDependencies": {
-    "css-loader": "^3.5.3",
+    "css-loader": "^3.6.0",
     "electron": "^8.3.1",
     "electron-builder": "^22.7.0",
     "element-ui": "^2.13.2",
-    "rollup": "^2.15.0",
+    "rollup": "^2.16.1",
     "rollup-plugin-banner": "^0.2.1",
     "rollup-plugin-terser": "^5.3.0",
     "spectron": "^10.0.1",
@@ -68,7 +68,7 @@
     "url-loader": "^4.1.0",
     "vue": "^2.6.11",
     "vue-loader": "^15.9.2",
-    "vue-router": "^3.3.3",
+    "vue-router": "^3.3.4",
     "vue-template-compiler": "^2.6.11",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11"
