@@ -9,6 +9,38 @@
 </template>
 
 <script>
+<<<<<<< HEAD
+  import {
+    calcTime
+  } from '../utils/time'
+  import flow from '../components/flow'
+  export default {
+    data() {
+      return {
+        now: {},
+        isLink: false
+      }
+    },
+    components: {
+      flow
+    },
+    watch: {
+      isLink: function(v) {
+        if (v) return ipc.send('link')
+        return ipc.send('close')
+      }
+    },
+    mounted() {
+      ipc.send('getConf')
+      // 开机自动连接
+      ipc.once('config', (e, conf) => {
+        let node = conf.day || conf.night
+        if (node)
+          this.isLink = true
+      })
+      ipc.on('config', (e, conf) => {
+        const now = conf.mode === 'day' ? conf.day : conf.night.addr ? conf.night : conf.day
+=======
 import { calcTime } from "../utils/time"
 import flow from "../components/flow"
 export default {
@@ -45,6 +77,7 @@ export default {
               : conf.night.addr
               ? conf.night
               : conf.day
+>>>>>>> b253c5a58ce7ffad1ba8c8d879666252aa5bbdc1
         if (this.isLink && this.now.ip && now.ip !== this.now.ip) {
           // 已经连接 && ip 不相同
           ipc.send("link")
@@ -57,14 +90,22 @@ export default {
           message: "已连接",
           duration: 1000
         })
+<<<<<<< HEAD
+      }).on('closed', () => {
+=======
       })
       .on("closed", () => {
+>>>>>>> b253c5a58ce7ffad1ba8c8d879666252aa5bbdc1
         if (!this.isLink)
           this.$message({
             message: "已断开",
             duration: 1000
           })
       })
+<<<<<<< HEAD
+    }
+=======
+>>>>>>> b253c5a58ce7ffad1ba8c8d879666252aa5bbdc1
   }
 }
 </script>

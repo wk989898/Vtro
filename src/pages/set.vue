@@ -89,7 +89,6 @@
         this.login = login
       }).on('update-mode', () => {
         ipc.send('getConf')
-        // if (this.isLink) ipc.send('link')
       })
       setTimeout(() => {
         this.openNight({
