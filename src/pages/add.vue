@@ -15,7 +15,10 @@
         <el-input v-model="form.port"></el-input>
       </el-form-item>
       <el-form-item label="密码">
-        <el-input v-model="form.password" placeholder="请不要使用 @ 符号"></el-input>
+        <el-input
+          v-model="form.password"
+          placeholder="请不要使用 @ 符号"
+        ></el-input>
       </el-form-item>
       <el-form-item label="备注">
         <el-input type="textarea" v-model="form.name"></el-input>
@@ -28,70 +31,74 @@
 </template>
 
 <script>
-  import Trojan from '../utils/trojan'
-  import {
-    Now
-  } from '../utils/time'
-  export default {
-    data() {
-      return {
-        form: {
-          addr: '',
-          port: 443,
-          password: '',
-          name: ''
-        },
-        tro: ''
-      }
-    },
-    methods: {
-      add() {
-        let form = this.form
-        let data = {
-          password: form.password,
-          ip: '',
-          port: parseInt(form.port),
-          allow: 1,
-          addr: form.addr,
-          name: form.name,
-          // ping: 0
-        }
-        if (form.addr && typeof form.addr == 'string' && form.port && typeof form.port == 'number' &&
-          form.name && form.password)
-          this.addnode(data)
-        else this.$message('请输入正确的格式!')
+import Trojan from "../utils/trojan"
+import { Now } from "../utils/time"
+export default {
+  data() {
+    return {
+      form: {
+        addr: "",
+        port: 443,
+        password: "",
+        name: ""
       },
-      addtro() {
-        let data = Trojan.toTrojan(this.tro)
+      tro: ""
+    }
+  },
+  methods: {
+    add() {
+      let form = this.form
+      let data = {
+        password: form.password,
+        ip: "",
+        port: parseInt(form.port),
+        allow: 1,
+        addr: form.addr,
+        name: form.name
+        // ping: 0
+      }
+      if (
+        form.addr &&
+        typeof form.addr == "string" &&
+        form.port &&
+        typeof form.port == "number" &&
+        form.name &&
+        form.password
+      )
         this.addnode(data)
-      },
-      addnode(data) {
-        ipc.send('add-node', data)
-        this.tro = ''
-        this.form = {
-          addr: '',
-          port: 443,
-          password: '',
-          name: ''
-        }
-        setTimeout(() => {
-          ipc.send('get-nodes')
-        }, 1000);
-        this.$notify({
-          title: '节点添加',
-          message: `添加节点成功\n${Now()}`,
-          type: 'success',
-          duration: 1500,
-          showClose: false
-        });
+      else this.$message("请输入正确的格式!")
+    },
+    addtro() {
+      let data = Trojan.toTrojan(this.tro)
+      this.addnode(data)
+    },
+    addnode(data) {
+      ipc.send("add-node", data)
+      this.tro = ""
+      this.form = {
+        addr: "",
+        port: 443,
+        password: "",
+        name: ""
       }
+      setTimeout(() => {
+        ipc.send("get-nodes")
+      }, 1000)
+      this.$notify({
+        title: "节点添加",
+        message: `添加节点成功\n${Now()}`,
+        type: "success",
+        duration: 1500,
+        showClose: false
+      })
     }
   }
+}
 </script>
 <style scoped>
-  textarea {
-    width: 35%;
-    height: 20%;
-    min-height: 40px;
-  }
+textarea {
+  width: 35%;
+  height: 20%;
+  min-height: 40px;
+}
 </style>

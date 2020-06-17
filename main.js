@@ -220,7 +220,7 @@ function changeConfig() {
     openConf('r', null, async res => {
       let now
       const { isIP = true, fast_open = false, reuse_port = false, reuse_session = true } = other
-      if (!res.config.night) now = res.config.day
+      if (!res.config.night.ip) now = res.config.day
       else now = res.config.mode === 'night' ? res.config.night : res.config.day
       // password,addr,port
       data.remote_addr = isIP ? now.ip : now.addr
@@ -298,11 +298,11 @@ ipcMain.on('link', (e, type) => {
     } else makeproxy('set', 1)
   })
   e.reply('linked')
-  console.log('link is open')
+  console.log('trojan open')
 }).on('close', (e, r) => {
   allquit()
   e.reply('closed')
-  console.log('link is closed')
+  console.log('trojan closed')
 })
 
 // 获取节点 更改连接节点 夜间节点 mode
