@@ -104,9 +104,6 @@
         ipc.send('setConf', {
           proxy: newval
         })
-        // if (this.isLink) setTimeout(() => {
-        //   ipc.send('link')
-        // }, 1000)
       }
     },
     methods: {
