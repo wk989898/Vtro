@@ -69,6 +69,17 @@
           label="fast_open"
           @change="setOther('fast_open')"
         /><br /><br />
+        日志等级： 
+        <el-select v-model="log_level" placeholder="日志等级" @change="ChangeLog">
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          >
+          </el-option>
+        </el-select>
+        <br /><br />
         <span>如果不懂请保持默认~</span>
       </el-tab-pane>
     </el-tabs>
@@ -94,12 +105,34 @@ export default {
       isIP: true,
       reuse_port: false,
       fast_open: false,
-      reuse_session: true
+      reuse_session: true,
+      // 0: ALL; 1: INFO; 2: WARN; 3: ERROR; 4: FATAL; 5: OFF.
+      log_level:'',
+      options:[{
+        value:0,
+        label:'ALL'
+      },{
+        value:1,
+        label:'INFO'
+      },{
+        value:2,
+        label:'WARN'
+      },{
+        value:3,
+        label:'ERROR'
+      },{
+        value:4,
+        label:'FATAL'
+      },{
+        value:5,
+        label:'OFF'
+      }]
     }
   },
   mounted() {
     ipc.send("get-login")
     ipc.send("getConf")
+    ipc.send("get_log_level")
     ipc
       .on("config", (e, conf) => {
         let {
@@ -122,6 +155,9 @@ export default {
       .on("update-mode", () => {
         ipc.send("getConf")
       })
+      .on('log_level',(e,level)=>{
+        this.log_level=level
+      })
     setTimeout(() => {
       this.openNight({
         startTime: this.startTime,
@@ -140,6 +176,9 @@ export default {
   methods: {
     changeLogin(e) {
       ipc.send("set-login", e)
+    },
+    ChangeLog(index){
+      ipc.send("change_log_level", index)
     },
     selectNode() {
       if (this.pid1) {

@@ -429,6 +429,19 @@ ipcMain.on('pac', e => {
   shell.openItem(_path('trojan/trojan-log.txt'))
 }).on('link-log', e => {
   shell.openItem(_path('trojan/log.txt'))
+}).on('change_log_level',(e,level)=>{
+  fs.readFile(_path('trojan/config.json'),(err,res)=>{
+    if(err) appendLog(err)
+    let data=JSON.parse(res)
+    data['log_level']=level
+    fs.writeFile(_path('trojan/config.json'),JSON.stringify(data),err=>{})
+  })
+}).on('get_log_level',e=>{
+  fs.readFile(_path('trojan/config.json'),(err,res)=>{
+    if(err) appendLog(err)
+    const level=JSON.parse(res)['log_level']
+    e.reply('log_level',level)
+  })
 })
 
 // ipcMain.on('test', e => {

@@ -13,19 +13,10 @@
       <el-menu-item index="trojan-log">trojan日志</el-menu-item>
       <el-menu-item index="link-log">连接日志</el-menu-item>
     </el-submenu>
-    <el-menu-item index="pac">
-      更新pac
-      <!-- <el-popconfirm
-  confirmButtonText='确定'
-  cancelButtonText='取消'
-  icon="el-icon-info"
-  iconColor="green"
-  @Confirm="confirm"
-  title="确定更新pac吗？"
->
-        <div class="el-submenu__title" slot="reference">更新pac</div>
-      </el-popconfirm> -->
-    </el-menu-item>
+    <el-submenu index="_pac">
+      <template slot="title">更新pac</template>
+      <el-menu-item index="pac">更新pac</el-menu-item>
+    </el-submenu>
 </el-menu>
 
   <div class="content">
