@@ -209,19 +209,19 @@ export default {
     },
     openNight(time) {
       if (this.pid1 || this.pid2) return false
-      const [isOpen, last, night = 0] = calcTime(time)
+      const [isOpen, last, before = 0] = calcTime(time)
       if (last === 0) {
         this.$message("设置夜间节点无效")
         return false
       }
       console.log(
-        "time.js %s start %d before %d",
+        "time.js now:%s \nlast for %d \nbefore %d",
         isOpen,
         last * 60,
-        night * 60
+        before * 60
       )
-      night && this.mode === "night" && this.timer("day", 0)
-      this.pid1 = this.timer("night", night * 1000 * 60)
+      before && this.mode === "night" && this.timer("day", 0)
+      this.pid1 = this.timer("night", before * 1000 * 60)
       this.pid2 = this.timer("day", last * 1000 * 60)
       return true
     },

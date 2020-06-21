@@ -1,6 +1,4 @@
 export function calcTime({ startTime, endTime }) {
-  // const start = startTime
-  // const end = endTime
   if (startTime === endTime) return [false, 0]
   const now = new Date()
   var [starthour, startmin] = startTime.split(':').map(v => Number(v))
@@ -9,19 +7,21 @@ export function calcTime({ startTime, endTime }) {
   /**
    * rewrite
    */
-  const start=starthour*60+startmin
-  const end=endhour*60+endmin
-  const _now=hour*60+min
-  if(start>end){
+  const start = starthour * 60 + startmin
+  const end = endhour * 60 + endmin
+  const _now = hour * 60 + min
+  if (start > end) {
     // 隔夜
-    if(_now>start||_now<end){
-      const last=_now>start?(_start-last+_end):(end-_now)
-      return [true,last]
-    }else return [false,end+24*60-start,start-_now]
-  }else {
-    if(_now<start){
-      return [false,start-_now,end-start]
-    }else return [true,end-_now]
+    if (_now > start || _now < end) {
+      const last = _now > start ? (_now - start + end) : (end - _now)
+      return [true, last]
+    } else
+      return [false, end + 24 * 60 - start, start - _now]
+  } else {
+    if (_now < start) {
+      return [false, start - _now, end - start]
+    } else
+      return [true, end - _now]
   }
 
   // endhour = endhour > starthour ? endhour :
