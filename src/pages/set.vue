@@ -215,7 +215,7 @@ export default {
         return false
       }
       console.log(
-        "time.js now:%s \nlast for %d \nbefore %d",
+        "isNight? %s \nlast for %d s\nbefore %d s",
         isOpen,
         last * 60,
         before * 60

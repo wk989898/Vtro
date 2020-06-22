@@ -17,7 +17,7 @@
       <el-table-column prop="ping" label="ping(ms)">
       </el-table-column>
     </el-table>
-    <div id="menu" ref="meun">
+    <div id="menu" ref="menu">
       <div class="menu" @click="contextClick('delete',$event)">删除</div>
       <div class="menu" @click="contextClick('update',$event)">修改</div>
       <div class="menu" @click="contextClick('ping',$event)">ping</div>
@@ -89,7 +89,7 @@
         ipc.send('change-linkNode', e)
       },
       contextmenu(r, d, e) {
-        let meun = this.$refs.meun
+        let menu = this.$refs.menu
         // node为选中节点
         this.node = r
         let length = menu.children.length
@@ -147,7 +147,7 @@
             })
             .finally(() => this.$message('已经复制到粘贴板~'))
         }
-        this.$refs.meun.style.height = '0'
+        this.$refs.menu.style.height = '0'
       },
     }
   }
@@ -170,11 +170,12 @@
     cursor: default;
   }
   #menu .menu {
-    width: 110px;
+    width: 300px;
     height: 30px;
     border-bottom: 1px solid #ccc;
     line-height: 30px;
     padding: 0 10px;
+    overflow: hidden;
   }
   #menu .menu:hover {
     background: #ccc;
