@@ -1,8 +1,9 @@
 /**
+ * @format
  * trojan://password
  * @ip:port
  * ?allowInsecure=1&peer=addr
- * #Name_NetflixHBO
+ * #name
  */
 
 class Trojan {

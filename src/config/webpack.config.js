@@ -1,4 +1,5 @@
 const path = require('path')
+const fs=require('fs')
 const TerserPlugin = require('terser-webpack-plugin')
 const { VueLoaderPlugin } = require("vue-loader")
 const webpack = require('webpack');
@@ -28,6 +29,7 @@ module.exports = {
     filename: 'bundle.js',
     path: path.resolve('lib')
   },
+  target:'electron-renderer',
   resolve: {
     alias: {
       '@': './src'

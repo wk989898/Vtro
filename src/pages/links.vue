@@ -5,17 +5,21 @@
       <el-switch v-model="isLink" active-text="开启" inactive-text="关闭" />
       <p class="now">{{ now.name }}</p>
     </div>
+    <p :style="test | testColor">url test: {{ test }}ms</p>
   </div>
 </template>
 
 <script>
 import { calcTime } from "../utils/time"
 import flow from "../components/flow"
+import urlTest from "../utils/url-test"
+
 export default {
   data() {
     return {
       now: {},
-      isLink: false
+      isLink: false,
+      test: -1
     }
   },
   components: {
@@ -25,6 +29,15 @@ export default {
     isLink: function(v) {
       if (v) return ipc.send("link")
       return ipc.send("close")
+    }
+  },
+  filters: {
+    testColor: function(v) {
+      const c = "color:"
+      v = Number(v) || 0
+      if (v === -1) return c + "red"
+      else if (v < 1000) return c + "green"
+      else return c + "#FBCC00"
     }
   },
   mounted() {
@@ -56,6 +69,10 @@ export default {
         this.$message({
           message: "已连接",
           duration: 1000
+        })
+        this.test = -1
+        urlTest().then(res => {
+          this.test = res
         })
       })
       .on("closed", () => {
