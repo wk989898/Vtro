@@ -283,6 +283,13 @@ ipcMain.on('link', (e, type) => {
   openConf('r', null, res => {
     const type = res.config.proxy || 'pac'
     const [p1, p2 = 1081, p3 = 1082] = res.config.listen
+    fs.readFile(_path('./proxy/config.txt'),(err,res)=>{
+      if(err) appendLog(err)
+      let c=res.toString()
+      let l=c.replace(/(listen-address.+\:)\d+\n/,`$1${p2}\n`)
+      .replace(/(forward-socks5.+\:)\d+.+\n/,`$1${p1} .\n`)
+      fs.writeFileSync(_path('./proxy/config.txt'),l,()=>{})
+    })
     if (type === 'global') {
       arg = `http://127.0.0.1:${p2}`
       let list = `localhost;127.*`
@@ -390,6 +397,9 @@ ipcMain.on('getConf', e => {
     e.reply('config', res.config)
   })
 }).on('setConf', (e, conf) => {
+  // if(conf.listen){
+  //   [_,http,pac]=conf.listen
+  // }
   openConf('a', null, res => {
     Object.assign(res.config, conf)
     e.reply('config', res.config)

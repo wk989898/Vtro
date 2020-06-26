@@ -38,7 +38,7 @@ trojan 的 windows 图形界面
     |http|-|1081|
     |socks5|-|1080|
     > 设置 off 后会开启 socks5 端口 ❗
-  - listen `array` default: `[1080,1081,1082]` 监听端口
+  - listen `array` default: `[1080,1081,1082]` 监听端口(改变端口后需自行重新连接)
   - time `object`
   - startTime default: `'19:30'`
   - endTime default: `'00:30'`
