@@ -73,7 +73,7 @@ describe('Vtro', () => {
       app.webContents.send('test', 'jest')
     })
   })
-  
+
   it('config', () => {
     app.client.waitUntilWindowLoaded().then(() => {
       const ipc = app.client.window.ipc

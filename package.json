@@ -36,7 +36,7 @@
     ]
   },
   "scripts": {
-    "test": "jest ",
+    "test": "jest",
     "start": "electron . ",
     "webpack": "webpack --config ./src/config/webpack.config.js",
     "rollup": "rollup -c -m",

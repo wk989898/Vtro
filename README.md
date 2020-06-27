@@ -11,7 +11,7 @@ trojan 的 windows 图形界面
 - 可以订阅和添加节点,更新订阅时会删除原有所有节点
 - 默认[配置](extra-trojan/config.json) ssl 验证为`false` 其它保持默认，如果其他选项里没有则需要请自行更改  
   ❗ 每次启动设置默认 
-- 支持 ping,tcp-ping
+- 支持 ping,tcp-ping,url-test
 - 流量统计由trojan输出数据得出
 - 建议搭配[SwitchyOmega](https://github.com/FelisCatus/SwitchyOmega)使用
 - pac更新可以[自行更新](./proxy/fetchPAC.js)  
@@ -19,7 +19,7 @@ trojan 的 windows 图形界面
 
 ## Feature
 
-### 根据时间改变节点 , 适用于晚上自动更改连接节点(如果节点质量不好)
+### 根据当前时间改变节点 , 适用于晚上网络拥堵时自动更改连接节点
 
 `开始结束时间相同视为关闭 默认：'19:30'-'00:30',`
 
