@@ -19,6 +19,6 @@ module.exports = function urlTest(proxy) {
     const { statusCode } = res
     if (statusCode === 204)
       return Date.now() - start
-    else return 'fail'
+    else return -1
   })
 }

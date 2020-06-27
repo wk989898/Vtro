@@ -2,7 +2,7 @@
   <div class="links">
     <flow />
     <div class="link">
-      <el-switch v-model="isLink" active-text="开启" inactive-text="关闭" />
+      <el-switch v-model="isLink" active-text="开启" inactive-text="关闭" id="switch"/>
       <p class="now">{{ now.name }}</p>
     </div>
     <p :style="test | testColor">url test: {{ test }}ms</p>

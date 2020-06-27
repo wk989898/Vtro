@@ -3,5 +3,4 @@ trojan
 dist
 *.png
 .vscode
-test
-jest.config.js
+
