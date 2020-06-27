@@ -51,9 +51,13 @@ if (!Lock) {
   })
   app.on('ready', () => {
     createWindow()
-    //  开发者工具
     const isPackaged = app.isPackaged
     !isPackaged && win.webContents.openDevTools()
+    /**
+     * @issue https://github.com/electron-userland/spectron/issues/254
+     */
+    if (process.env.NODE_ENV === 'test') win.webContents.closeDevTools()
+    
     // tray 路径为运行时路径 ./resource
     tray = new Tray(
       isPackaged ? path.resolve(app.getAppPath(), '../tray.ico') : 'tray.ico'
@@ -283,12 +287,12 @@ ipcMain.on('link', (e, type) => {
   openConf('r', null, res => {
     const type = res.config.proxy || 'pac'
     const [p1, p2 = 1081, p3 = 1082] = res.config.listen
-    fs.readFile(_path('./proxy/config.txt'),(err,res)=>{
-      if(err) appendLog(err)
-      let c=res.toString()
-      let l=c.replace(/(listen-address.+\:)\d+\n/,`$1${p2}\n`)
-      .replace(/(forward-socks5.+\:)\d+.+\n/,`$1${p1} .\n`)
-      fs.writeFileSync(_path('./proxy/config.txt'),l,()=>{})
+    fs.readFile(_path('./proxy/config.txt'), (err, res) => {
+      if (err) appendLog(err)
+      let c = res.toString()
+      let l = c.replace(/(listen-address.+\:)\d+\n/, `$1${p2}\n`)
+        .replace(/(forward-socks5.+\:)\d+.+\n/, `$1${p1} .\n`)
+      fs.writeFileSync(_path('./proxy/config.txt'), l, () => { })
     })
     if (type === 'global') {
       arg = `http://127.0.0.1:${p2}`
@@ -439,18 +443,18 @@ ipcMain.on('pac', e => {
   shell.openItem(_path('trojan/trojan-log.txt'))
 }).on('link-log', e => {
   shell.openItem(_path('trojan/log.txt'))
-}).on('change_log_level',(e,level)=>{
-  fs.readFile(_path('trojan/config.json'),(err,res)=>{
-    if(err) appendLog(err)
-    let data=JSON.parse(res)
-    data['log_level']=level
-    fs.writeFile(_path('trojan/config.json'),JSON.stringify(data),err=>{})
+}).on('change_log_level', (e, level) => {
+  fs.readFile(_path('trojan/config.json'), (err, res) => {
+    if (err) appendLog(err)
+    let data = JSON.parse(res)
+    data['log_level'] = level
+    fs.writeFile(_path('trojan/config.json'), JSON.stringify(data), err => { })
   })
-}).on('get_log_level',e=>{
-  fs.readFile(_path('trojan/config.json'),(err,res)=>{
-    if(err) appendLog(err)
-    const level=JSON.parse(res)['log_level']
-    e.reply('log_level',level)
+}).on('get_log_level', e => {
+  fs.readFile(_path('trojan/config.json'), (err, res) => {
+    if (err) appendLog(err)
+    const level = JSON.parse(res)['log_level']
+    e.reply('log_level', level)
   })
 })
 
