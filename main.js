@@ -57,7 +57,7 @@ if (!Lock) {
      * @issue https://github.com/electron-userland/spectron/issues/254
      */
     if (process.env.NODE_ENV === 'test') win.webContents.closeDevTools()
-    
+
     // tray 路径为运行时路径 ./resource
     tray = new Tray(
       isPackaged ? path.resolve(app.getAppPath(), '../tray.ico') : 'tray.ico'
@@ -100,8 +100,21 @@ app.on('activate', function () {
 
 
 // utils
+/**
+ * @param {string} channel 
+ * @param {any} args 
+ */
 function send(channel, args) {
   return win.webContents.send(channel, args)
+}
+/**
+ * @param {string} event 
+ */
+function trigger(event) {
+  const cb = ipcMain.listeners(event)[0]
+  if (type(cb) === 'function') cb({ reply: send })
+  else
+    console.log(`not found Event ${event}\n,trigger failed`);
 }
 
 function type(a) {
@@ -258,15 +271,6 @@ function flow(trojan = trojan) {
     sent = 0
   })
 }
-function convert(data = 0) {
-  data = Math.abs(data)
-  for (let i of flow_unit) {
-    if (data < 1024 * size[i]) {
-      return (data / size[i]).toFixed(2) + i
-    }
-  }
-  return (data / size['GB']).toFixed(2) + 'GB'
-}
 
 /** 监听事件 */
 
@@ -401,13 +405,13 @@ ipcMain.on('getConf', e => {
     e.reply('config', res.config)
   })
 }).on('setConf', (e, conf) => {
-  // if(conf.listen){
-  //   [_,http,pac]=conf.listen
-  // }
   openConf('a', null, res => {
     Object.assign(res.config, conf)
     e.reply('config', res.config)
   })
+  setTimeout(() => {
+    trigger('link')
+  }, 1e3);
 })
 // 开机启动
 ipcMain.on('set-login', (e, login) => {
@@ -457,10 +461,6 @@ ipcMain.on('pac', e => {
     e.reply('log_level', level)
   })
 })
-
-// ipcMain.on('test', e => {
-//   e.reply('test-replay', 'test')
-// })
 
 var menu = null
 if (!app.isPackaged) {
