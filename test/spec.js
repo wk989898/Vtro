@@ -1,3 +1,4 @@
+"use strict";
 const Application = require('spectron').Application;
 const path = require('path');
 const { readFileSync } = require('fs');
