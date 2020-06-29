@@ -1,9 +1,17 @@
 
+/**
+ * @param {Host} host 
+ * @param {Callback} cb 
+ */
 export function _ping(host, cb) {
   ping.promise.probe(host.addr, {
     timeout: 10
   }).then(cb)
 }
+/**
+ * @param {Host} host 
+ * @param {Callback} cb 
+ */
 export function _tcping(host, cb) {
   tcping({
     address: host.ip || host.addr,
@@ -11,7 +19,10 @@ export function _tcping(host, cb) {
     attempts: 5,
   }).then(cb)
 }
-
+/**
+ * ping test
+ * @param {Array<Host>} lists 
+ */
 export function makeping(lists) {
   lists.forEach(list => {
     // list.ping = 'wait'
@@ -20,6 +31,10 @@ export function makeping(lists) {
     })
   })
 }
+/**
+ * tcping test
+ * @param {Array<Host>} lists 
+ */
 export function maketcping(lists) {
   lists.forEach(list => {
     list.ping = 'wait'
@@ -28,4 +43,9 @@ export function maketcping(lists) {
     })
   })
 }
+
+/**
+ * @typedef {{ip:string|number,addr:'string',[props:string]:string}} Host
+ * @callback Callback
+ */
 

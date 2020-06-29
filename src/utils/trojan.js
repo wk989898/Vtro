@@ -1,12 +1,9 @@
 /**
+ * trojan format
  * @author wk989898
- * @format
- * trojan://password
- * @ip:port
- * ?allowInsecure=1&peer=addr
- * #name
+ * @example trojan格式
+ * `trojan://password@ip:port?allowInsecure=1&peer=addr#name`
  */
-
 class Trojan {
   DecodeBase64(data) {
     let buf = new Buffer.from(data, 'base64')

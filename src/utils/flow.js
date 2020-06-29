@@ -6,7 +6,10 @@ const size = {
   GB: 1 << 30
 }
 const flow_unit = Object.keys(size)
-
+/**
+ * @param {number} data 
+ * @returns {string} flow usage
+ */
 export function convert(data = 0) {
   data = Math.abs(data)
   for (let i of flow_unit) {

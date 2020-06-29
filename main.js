@@ -98,7 +98,6 @@ app.on('activate', function () {
   if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
-
 // utils
 /**
  * @param {string} channel 
@@ -108,6 +107,7 @@ function send(channel, args) {
   return win.webContents.send(channel, args)
 }
 /**
+ * @listens `event` 
  * @param {string} event 
  */
 function trigger(event) {
@@ -205,10 +205,9 @@ function deleteData(name, condition) {
 /**
  * @param {string} type r | w | a
  * @param {any} data 写入数据  default :''
- * @callback cb
- * @param {object} res
+ * @param {(res:object)=>unknown} cb callBack
  */
-async function openConf(type, data = '', cb) {
+async function openConf(type, data = '', cb,any) {
   let file = _path('./trojan/conf.json')
   if (type === 'r') {
     return await fs.readFile(file, 'utf-8', (err, res) => {
