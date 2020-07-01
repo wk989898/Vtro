@@ -4,7 +4,7 @@
 
 ## 介绍
 
-trojan 的 windows 图形界面 
+trojan 的 windows 图形界面
 
 ## 注意
 
@@ -16,6 +16,7 @@ trojan 的 windows 图形界面
 - 建议搭配[SwitchyOmega](https://github.com/FelisCatus/SwitchyOmega)使用
 - pac更新可以[自行更新](./proxy/fetchPAC.js)  
 出现错误==>[还原文件](./proxy/_proxy.pac)
+
 
 ## Feature
 
@@ -74,3 +75,5 @@ cd dist
 [privoxy](https://www.privoxy.org/)  
 [v2rayN](https://github.com/2dust/v2rayN)  
 [QRCode](https://github.com/davidshimjs/qrcodejs)
+
+### 本软件仅作学习使用，任何个人或集体不得使用本软件进行任何违反相关法律法规的活动
