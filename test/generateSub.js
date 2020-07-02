@@ -1,6 +1,8 @@
+const fs=require('fs')
+const path=require('path')
+
 const str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 const number = "0123456789"
-const fs=require('fs')
 
 var encode = (subtxt)=>Buffer.from(subtxt).toString('base64')
 
@@ -11,7 +13,7 @@ function generateSub(num) {
     result.push({password,ip,port,addr,name,addr:'addr',name:'name',allowInsecure:1})
     txt += `trojan://${password}@${ip}:${port}?allowInsecure=1&peer=${addr}#${name}\n`
   }
-  fs.writeFileSync('./sub.txt',JSON.stringify(result))
+  fs.writeFileSync(path.resolve(__dirname,'./sub.txt'),JSON.stringify(result))
   return encode(txt)
 }
 
