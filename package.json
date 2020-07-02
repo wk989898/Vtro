@@ -6,15 +6,13 @@
   "build": {
     "productName": "Vtro",
     "win": {
-      "target": [
-        {
-          "target": "zip",
-          "arch": [
-            "x64",
-            "ia32"
-          ]
-        }
-      ],
+      "target": [{
+        "target": "zip",
+        "arch": [
+          "x64",
+          "ia32"
+        ]
+      }],
       "icon": "256.ico"
     },
     "extraResources": [
@@ -45,6 +43,11 @@
     "dist": "electron-builder --win ",
     "predist": "npm run build"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm test"
+    }
+  },
   "repository": "https://github.com/wk989898/Vtro",
   "keywords": [
     "Electron",
@@ -55,11 +58,13 @@
   "author": "wk989898",
   "license": "ISC",
   "devDependencies": {
+    "@types/jest": "^26.0.3",
     "css-loader": "^3.6.0",
-    "electron": "^8.3.1",
+    "electron": "^8.3.4",
     "electron-builder": "^22.7.0",
     "element-ui": "^2.13.2",
-    "rollup": "^2.16.1",
+    "jest": "^26.1.0",
+    "rollup": "^2.18.2",
     "rollup-plugin-banner": "^0.2.1",
     "rollup-plugin-terser": "^5.3.0",
     "spectron": "^10.0.1",
@@ -67,15 +72,13 @@
     "terser-webpack-plugin": "^2.3.7",
     "url-loader": "^4.1.0",
     "vue": "^2.6.11",
-    "vue-loader": "^15.9.2",
+    "vue-loader": "^15.9.3",
     "vue-router": "^3.3.4",
     "vue-template-compiler": "^2.6.11",
     "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^3.3.12"
   },
   "dependencies": {
-    "@types/jest": "^26.0.0",
-    "jest": "^26.0.1",
     "ping": "^0.2.3",
     "socks-proxy-agent": "^5.0.0",
     "tcp-ping": "^0.1.1"
