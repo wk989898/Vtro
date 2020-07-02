@@ -1,0 +1,1 @@
+[{"password":"s","ip":"60.93.99.75","port":"48","addr":"addr","name":"name","allowInsecure":1},{"password":"KmX","ip":"470.1.150.6","port":"6","addr":"addr","name":"name","allowInsecure":1}]

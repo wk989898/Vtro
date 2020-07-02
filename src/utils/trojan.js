@@ -26,13 +26,9 @@ class Trojan {
   }
   subscribe(txt) {
     let arr = txt.split('_')
-    let str = '', list
-    let result = []
-    list = arr.map(v => {
-      return this.DecodeBase64(v)
-    })
-    list.forEach(v => {
-      str += v
+    let str = '',result = []
+    arr.forEach(v => {
+      str+=this.DecodeBase64(v)
     })
     let links = str.split('\n')
     links.forEach(link => {

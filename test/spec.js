@@ -3,6 +3,7 @@ const Application = require('spectron').Application;
 const path = require('path');
 const { readFileSync } = require('fs');
 const urlTest = require('../src/utils/url-test');
+
 const { exec } = require('child_process');
 
 process.env.NODE_ENV = 'test'
@@ -31,11 +32,8 @@ describe('Vtro', () => {
   })
   afterAll((done) => {
     if (app.isRunning()) {
-      app.webContents.stop()
-      app.stop().then(() => {
-        exec(`pkill -f ${appPath}\\main.js`)
-        done()
-      })
+      app.mainProcess.exit()
+      done()
     }
   })
 
@@ -114,4 +112,6 @@ describe('Vtro', () => {
     })
   })
 })
+
+
 
