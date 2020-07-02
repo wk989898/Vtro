@@ -1,6 +1,7 @@
 # Vtro ![Vtro](./tray.ico)
 
 [![GitHub license](https://img.shields.io/github/license/wk989898/Vtro)](https://github.com/wk989898/Vtro/blob/master/LICENSE)
+[![codecov](https://codecov.io/gh/wk989898/Vtro/branch/master/graph/badge.svg)](https://codecov.io/gh/wk989898/Vtro)
 
 ## 介绍
 

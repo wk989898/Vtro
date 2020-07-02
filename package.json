@@ -35,6 +35,7 @@
   },
   "scripts": {
     "test": "jest --coverage",
+    "coverage":"codecov -f ./coverage/coverage-final.json",
     "start": "electron . ",
     "webpack": "webpack --config ./src/config/webpack.config.js",
     "rollup": "rollup -c -m",
