@@ -58,9 +58,9 @@ if (!Lock) {
      */
     if (process.env.NODE_ENV === 'test') win.webContents.closeDevTools()
 
-    // tray 路径为运行时路径 ./resource
+    // tray 路径为运行时路径 ./resource/
     tray = new Tray(
-      isPackaged ? path.resolve(app.getAppPath(), '../tray.ico') : 'tray.ico'
+      isPackaged ? path.resolve(app.getAppPath(), '../tray.ico') : 'icon/tray.ico'
     )
     let traylist = [
       {
