@@ -1,20 +1,25 @@
 <template>
   <div class="main">
-  <el-menu :default-active="activeIndex" class="el-menu" mode="horizontal" @select="select">
-    <el-menu-item index="nodes">列表</el-menu-item>
-    <el-submenu index="add-link">
-      <template slot="title">添加节点</template>
+    <el-menu :default-active="activeIndex" class="el-menu" mode="horizontal" @select="select">
+      <el-menu-item index="nodes">列表</el-menu-item>
+      <el-submenu index="add-link">
+        <template slot="title">添加节点
+</template>
       <el-menu-item index="sub">订阅</el-menu-item>
       <el-menu-item index="add">手动添加</el-menu-item>
     </el-submenu>
     <el-menu-item index="set">设置</el-menu-item>
     <el-submenu index="log">
-      <template slot="title">日志</template>
+<template slot="title">
+  日志
+</template>
       <el-menu-item index="trojan-log">trojan日志</el-menu-item>
       <el-menu-item index="link-log">连接日志</el-menu-item>
     </el-submenu>
     <el-submenu index="_pac">
-      <template slot="title">更新pac</template>
+<template slot="title">
+  更新pac
+</template>
       <el-menu-item index="pac">更新pac</el-menu-item>
     </el-submenu>
 </el-menu>
@@ -37,7 +42,7 @@
     name: 'App',
     data() {
       return {
-        activeIndex:'nodes',
+        activeIndex: 'nodes',
       }
     },
     components: {
@@ -45,18 +50,21 @@
       back,
     },
     created() {
-      // this.$router.push(`/`)
+      this.$router.push(`/set`)
+      this.$nextTick(() => {
+        this.$router.push(`/`)
+      })
       // test
       // ipc.send('test')
       // ipc.on('test-replay', (e, r) => {
       //   console.log(r)
       // })
     },
-    methods:{
-      select(index){
-        if(/pac|log/.test(index)){
+    methods: {
+      select(index) {
+        if (/pac|log/.test(index)) {
           ipc.send(index)
-          return ;
+          return;
         }
         this.$router.push(`/${index}`)
       },
@@ -76,12 +84,12 @@
     padding: 20px;
     padding-top: 3px;
   }
-  .el-menu{
+  .el-menu {
     position: sticky !important;
     top: 0;
     z-index: 99;
   }
-  .content{
+  .content {
     margin-top: 5%;
   }
 </style>

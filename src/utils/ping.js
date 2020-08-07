@@ -1,7 +1,7 @@
 
 /**
  * @param {Host} host 
- * @param {Callback} cb 
+ * @param {Callback} cb
  */
 export function _ping(host, cb) {
   ping.promise.probe(host.addr, {
@@ -47,5 +47,6 @@ export function maketcping(lists) {
 /**
  * @typedef {{ip:string|number,addr:'string',[props:string]:string}} Host
  * @callback Callback
+ * @param {{avg:string,min:string,[prop:string]:any}} res
  */
 

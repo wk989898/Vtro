@@ -8,7 +8,6 @@ const https = require('https')
 const process = require('process')
 const dns = require('dns')
 
-
 var win, tray, trojan, privo, privoxypid, trojanpid
 var other = {
   isIP: true,
@@ -20,6 +19,8 @@ const server = http.createServer()
 
 function createWindow() {
   win = new BrowserWindow({
+    //default 
+    show:false,
     width: 800,
     height: 600,
     webPreferences: {
@@ -207,7 +208,7 @@ function deleteData(name, condition) {
  * @param {any} data 写入数据  default :''
  * @param {(res:object)=>unknown} cb callBack
  */
-async function openConf(type, data = '', cb,any) {
+async function openConf(type, data = '', cb, any) {
   let file = _path('./trojan/conf.json')
   if (type === 'r') {
     return await fs.readFile(file, 'utf-8', (err, res) => {
@@ -413,21 +414,15 @@ ipcMain.on('getConf', e => {
   }, 1e3);
 })
 // 开机启动
-ipcMain.on('set-login', (e, login) => {
-  if (!app.isPackaged) {
-    app.setLoginItemSettings({
-      openAtLogin: login,
-      openAsHidden: true
-    })
-  } else {
-    app.setLoginItemSettings({
-      openAsHidden: true,
-      openAtLogin: login,
-    })
-  }
+ipcMain.on('set-login', (e, isLogin) => {
+  app.setLoginItemSettings({
+    openAsHidden: true,
+    openAtLogin: isLogin
+  })
 }).on('get-login', e => {
   e.reply('login', app.getLoginItemSettings().openAtLogin)
 }).on('other', (e, [type, bool]) => {
+  // other options
   if (type in other)
     other[type] = bool
 })
