@@ -1,10 +1,9 @@
 "use strict";
 const Application = require('spectron').Application;
 const path = require('path');
+const http = require('http');
 const { readFileSync } = require('fs');
 const urlTest = require('../src/utils/url-test');
-
-const { exec } = require('child_process');
 
 process.env.NODE_ENV = 'test'
 var electronPath = path.join(__dirname, '..', 'node_modules', '.bin', 'electron');
@@ -21,7 +20,7 @@ var appPath = path.join(__dirname, '..')
 
 var app = new Application({
   path: electronPath,
-  args: [appPath],
+  args: [appPath]
 })
 
 jest.setTimeout(10000)
@@ -48,7 +47,7 @@ describe('Vtro', () => {
     expect(app.electron).toBeDefined()
   })
   it('title', () => {
-    app.client.getTitle().then(title => {
+    return app.client.getTitle().then(title => {
       expect(title).toEqual('Vtro - a trojan gui')
     })
   })
@@ -60,22 +59,23 @@ describe('Vtro', () => {
   })
 
   it('send and on', () => {
-    app.client.waitUntilWindowLoaded().then(() => {
-      const ipc = app.client.window.ipc
+    return app.client.waitUntilWindowLoaded().then(() => {
+      const ipc = app.electron.ipcRenderer
       ipc.on('test', (e, arg) => {
         expect(arg).toEqual('jest')
         e.reply('test-reply', 'jest!')
       })
-      app.electron.ipcMain.on('test-reply', (e, arg) => {
+      app.mainProcess.on('test-reply', (e, arg) => {
+        console.log('-----------------');
         expect(arg).toEqual('jest!')
       })
       app.webContents.send('test', 'jest')
     })
   })
 
-  it('config', () => {
-    app.client.waitUntilWindowLoaded().then(() => {
-      const ipc = app.client.window.ipc
+  it('conf.json', () => {
+    return app.client.waitUntilWindowLoaded().then(() => {
+      const ipc = app.electron.ipcRenderer
       ipc.once("config", (e, conf) => {
         expect(conf).toEqual(conf)
       })
@@ -83,8 +83,8 @@ describe('Vtro', () => {
   })
 
   it('nodes', () => {
-    app.client.waitUntilWindowLoaded().then(() => {
-      const ipc = app.client.window.ipc
+    return app.client.waitUntilWindowLoaded().then(() => {
+      const ipc = app.electron.ipcRenderer
       ipc.once('update-nodes', (e, nodes) => {
         expect(nodes).toEqual(config.nodes)
       })
@@ -92,22 +92,44 @@ describe('Vtro', () => {
   })
 
   it('switch', () => {
-    app.client.waitUntilWindowLoaded().then(() => {
-      const ipc = app.client.window.ipc
-      function foo() { }
-      function bar() { }
-      ipc.on('linked', foo)
-      ipc.on('closed', bar)
-      expect(foo).toBeCalledTimes(1)
-      expect(bar).toBeCalledTimes(0)
-      app.client.click('#switch').then(() => {
-        expect(foo).toBeCalledTimes(1)
-        expect(bar).toBeCalledTimes(1)
-      }).then(() => {
-        app.client.click('#swich').then(() => {
-          expect(foo).toBeCalledTimes(2)
-          expect(bar).toBeCalledTimes(1)
-        })
+    return app.client.waitUntilWindowLoaded().then(async () => {
+      var link_count = 0
+      var close_count = 0
+      const ipc = app.electron.ipcRenderer
+      ipc.on('linked', () => link_count++)
+      ipc.on('closed', () => close_count++)
+      expect(link_count).toBe(0)
+      expect(close_count).toBe(0)
+      app.client.execute(function () {
+        document.querySelector('#switch').click()
+      })
+      expect(link_count).toBe(0)
+      expect(close_count).toBe(1)
+    })
+  })
+
+  it('http server test', async () => {
+    return app.client.waitUntilWindowLoaded().then(async () => {
+      app.client.execute(function () {
+        document.querySelector('#go_set').click()
+        setTimeout(() => {
+          document.querySelector("input[value='pac'].el-radio__original").click()
+        }, 1000);
+      })
+      const baseUrl = 'http://127.0.0.1'
+      console.log(config)
+      const [http_port, pac_port] = config.config.listen
+      console.log(http_port, pac_port)
+      await http.get(`${baseUrl}:${http_port}`, (res) => {
+        const { statusCode: code, statusMessage: msg } = res
+        console.log(code, msg);
+        expect(code).toEqual(400)
+        expect(msg).toBe("Invalid header received from client")
+      })
+      await http.get(`${baseUrl}:${pac_port}/pac`, (res) => {
+        const { statusCode: code, statusMessage: msg } = res
+        expect(code).toEqual(200)
+        expect(msg).toBe("OK")
       })
     })
   })

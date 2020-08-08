@@ -3,26 +3,21 @@
     <el-menu :default-active="activeIndex" class="el-menu" mode="horizontal" @select="select">
       <el-menu-item index="nodes">列表</el-menu-item>
       <el-submenu index="add-link">
-        <template slot="title">添加节点
-</template>
-      <el-menu-item index="sub">订阅</el-menu-item>
-      <el-menu-item index="add">手动添加</el-menu-item>
-    </el-submenu>
-    <el-menu-item index="set">设置</el-menu-item>
-    <el-submenu index="log">
-<template slot="title">
-  日志
-</template>
-      <el-menu-item index="trojan-log">trojan日志</el-menu-item>
-      <el-menu-item index="link-log">连接日志</el-menu-item>
-    </el-submenu>
-    <el-submenu index="_pac">
-<template slot="title">
-  更新pac
-</template>
-      <el-menu-item index="pac">更新pac</el-menu-item>
-    </el-submenu>
-</el-menu>
+        <template slot="title">添加节点</template>
+        <el-menu-item index="sub">订阅</el-menu-item>
+        <el-menu-item index="add">手动添加</el-menu-item>
+      </el-submenu>
+      <el-menu-item index="set" id="go_set">设置</el-menu-item>
+      <el-submenu index="log">
+        <template slot="title">日志</template>
+        <el-menu-item index="trojan-log">trojan日志</el-menu-item>
+        <el-menu-item index="link-log">连接日志</el-menu-item>
+      </el-submenu>
+      <el-submenu index="_pac">
+        <template slot="title">更新pac</template>
+        <el-menu-item index="pac">更新pac</el-menu-item>
+      </el-submenu>
+    </el-menu>
 
   <div class="content">
     <keep-alive>

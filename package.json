@@ -19,8 +19,8 @@
     },
     "extraResources": [
       {
-        "from":"icon/tray.ico",
-        "to":"tray.ico"
+        "from": "icon/tray.ico",
+        "to": "tray.ico"
       }
     ],
     "extraFiles": [
@@ -49,11 +49,6 @@
     "dist": "electron-builder --win ",
     "predist": "npm run build"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run test"
-    }
-  },
   "repository": "https://github.com/wk989898/Vtro",
   "keywords": [
     "Electron",
@@ -69,7 +64,6 @@
     "electron": "^8.3.4",
     "electron-builder": "^22.7.0",
     "element-ui": "^2.13.2",
-    "husky": "^4.2.5",
     "jest": "^26.1.0",
     "rollup": "^2.18.2",
     "rollup-plugin-banner": "^0.2.1",

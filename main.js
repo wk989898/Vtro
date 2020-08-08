@@ -4,23 +4,21 @@ const path = require('path')
 const fs = require('fs')
 const cp = require('child_process')
 const http = require('http')
-const https = require('https')
 const process = require('process')
 const dns = require('dns')
 
-var win, tray, trojan, privo, privoxypid, trojanpid
+var win, tray, trojan, privo, privoxypid, trojanpid, server=null
 var other = {
   isIP: true,
   fast_open: false,
   reuse_port: false,
   reuse_session: true
 }
-const server = http.createServer()
 
 function createWindow() {
   win = new BrowserWindow({
     //default 
-    show:false,
+    show: false,
     width: 800,
     height: 600,
     webPreferences: {
@@ -143,21 +141,25 @@ function appendLog(err, path) {
   fs.appendFile(path, formatTime() + err + '\n', 'utf-8', () => { })
 }
 // 设置pac代理
-server.on('request', (req, res) => {
-  if (req.url === '/pac') {
-    res.setHeader('Content-Type', 'application/x-ns-proxy-autoconfig')
-    fs.readFile(_path('./proxy/proxy.pac'), (e, data) => {
-      if (e) res.end('error')
-      res.end(data)
-    })
-  }
-})
+function createServer() {
+  const server = http.createServer()
+  server.on('request', (req, res) => {
+    if (req.url === '/pac') {
+      res.setHeader('Content-Type', 'application/x-ns-proxy-autoconfig')
+      fs.readFile(_path('./proxy/proxy.pac'), (e, data) => {
+        if (e) res.end('error')
+        res.end(data)
+      })
+    }
+  })
+  return server
+}
 function makeproxy(type, arg, list) {
   cp.execFile('./sysproxy.exe', [type, arg, list], {
     cwd: _path('./proxy'),
     windowsHide: true
   }, (err, stdout, stderr) => {
-    if (err) appendLog(err) && server.close()
+    if (err) appendLog(err) && server && server.close()
     if (stderr) appendLog(stderr)
   })
 }
@@ -169,7 +171,7 @@ function privoxy() {
     // shell: true,
   }, (err) => {
     let log = 'privoxy error!has you close privoxy?\nplease check http://localhost:1081\n'
-    if (err) appendLog(log) && server.close()
+    if (err) appendLog(log) && server && server.close()
   })
   privoxypid = privo.pid
 }
@@ -177,7 +179,10 @@ function privoxy() {
 function allquit() {
   trojan && trojan.kill()
   privo && privo.kill()
-  server.listening && server.close()
+  if (server!=null) {
+    server.close()
+    server = null
+  }
 }
 // 添加文件
 async function addfile(name, chunk, cb) {
@@ -284,6 +289,7 @@ ipcMain.on('link', (e, type) => {
   }, (err, stdout, stderr) => {
     if (stderr) appendLog(stderr, _path('./trojan/trojan-log.txt'))
   })
+
   flow(trojan)
   trojanpid = trojan.pid
 
@@ -305,6 +311,8 @@ ipcMain.on('link', (e, type) => {
       privoxy()
     } else if (type === 'pac') {
       // default
+      if (server == null)
+        server = createServer()
       arg = `http://127.0.0.1:${p3}/pac`
       !server.listening && server.listen(p3, '127.0.0.1', () => {
         makeproxy(type, arg)
