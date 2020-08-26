@@ -5,15 +5,19 @@ const fs = require('fs')
 const cp = require('child_process')
 const http = require('http')
 const process = require('process')
-const dns = require('dns')
+const dns = require('dns');
+const { config } = require('process');
 
-var win, tray, trojan, privo, privoxypid, trojanpid, server=null
+
+var win, tray, trojan, privo, privoxypid, trojanpid, server = null
 var other = {
   isIP: true,
   fast_open: false,
   reuse_port: false,
   reuse_session: true
 }
+// check trojan dir
+!app.isPackaged && check()
 
 function createWindow() {
   win = new BrowserWindow({
@@ -99,6 +103,14 @@ app.on('activate', function () {
 
 // utils
 /**
+ * make trojan dir if there is no exist
+ */
+function check() {
+  require('copy-dir').sync('extra-trojan', 'trojan', {
+    cover: false
+  })
+}
+/**
  * @param {string} channel 
  * @param {any} args 
  */
@@ -179,7 +191,7 @@ function privoxy() {
 function allquit() {
   trojan && trojan.kill()
   privo && privo.kill()
-  if (server!=null) {
+  if (server != null) {
     server.close()
     server = null
   }
@@ -244,6 +256,12 @@ function changeConfig() {
       const { isIP = true, fast_open = false, reuse_port = false, reuse_session = true } = other
       if (!res.config.night.ip) now = res.config.day
       else now = res.config.mode === 'night' ? res.config.night : res.config.day
+      //first as default
+      if (!now.ip && res.nodes[0]) {
+        now = res.nodes[0]
+        res.config.day = now
+        send('config', res.config)
+      }
       // password,addr,port
       data.remote_addr = isIP ? now.ip : now.addr
       data.remote_port = now.port
