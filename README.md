@@ -3,8 +3,8 @@
 [![GitHub license](https://img.shields.io/github/license/wk989898/Vtro)](https://github.com/wk989898/Vtro/blob/master/LICENSE)
 
 ## 介绍
-an electron app base on vue and element-ui
-
+an electron app base on vue and element-ui  
+https://wk989898.github.io/Vtro/
 ## 运行
 ```shell
 npm install
