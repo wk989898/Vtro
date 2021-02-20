@@ -4,7 +4,6 @@
 
 ## 介绍
 an electron app base on vue and element-ui  
-https://wk989898.github.io/Vtro/
 ## 运行
 ```shell
 npm install
